@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Sistema de Vida</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#FAF8F4;font-family:'Segoe UI',system-ui,sans-serif;color:#3A3228;min-height:100vh;}
+
+  .topbar{background:#FAF8F4;border-bottom:1px solid #E2D9CE;padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+  .topbar-title{font-family:'Playfair Display',Georgia,serif;font-size:20px;color:#3A3228;font-weight:400;}
+  .topbar-sub{font-size:11px;color:#A09080;margin-top:2px;}
+  .nav{display:flex;gap:2px;background:#EDE8DF;border-radius:8px;padding:3px;}
+  .nav-btn{background:transparent;border:none;border-radius:6px;padding:6px 13px;font-size:12px;color:#7A6A58;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s;}
+  .nav-btn:hover{background:#FAF8F4;}
+  .nav-btn.active{background:#FAF8F4;color:#3A3228;font-weight:600;border:1px solid #D8D0C4;}
+
+  .page{display:none;padding:1.5rem;max-width:1100px;margin:0 auto;}
+  .page.active{display:block;}
+
+  .sec-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#9A8F7E;margin-bottom:0.6rem;margin-top:1.25rem;}
+  .sec-label:first-child{margin-top:0;}
+  .panel{background:#FFFCF8;border:1px solid #E2D9CE;border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1rem;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+
+  .metric{background:#F5EFE6;border-radius:10px;padding:0.75rem 1rem;text-align:center;}
+  .metric .ml{font-size:10px;color:#A09080;letter-spacing:0.06em;text-transform:uppercase;}
+  .metric .mv{font-size:22px;font-weight:600;color:#5C4E3D;margin-top:3px;}
+  .mv.pos{color:#5A8A5A;} .mv.neg{color:#A05050;}
+
+  .badge{font-size:10px;padding:2px 9px;border-radius:10px;font-weight:600;}
+  .badge-a{background:#E4EEE0;color:#4A7A4A;}
+  .badge-r{background:#EEE4D8;color:#8A6840;}
+  .badge-p{background:#EAE4EE;color:#705880;}
+
+  /* ÁREAS */
+  .area-card{background:#FFFCF8;border:1px solid #E2D9CE;border-radius:14px;padding:1rem 1.1rem 0.85rem;position:relative;overflow:hidden;transition:border-color 0.15s;}
+  .area-card:hover{border-color:#C4A882;}
+  .area-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;}
+  .area-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.3rem;padding-left:12px;}
+  .area-num{font-size:10px;color:#C0B0A0;letter-spacing:0.06em;}
+  .area-title{font-family:'Playfair Display',Georgia,serif;font-size:14px;color:#3A3228;padding-left:12px;margin-bottom:4px;font-weight:400;}
+  .area-desc{font-size:11.5px;color:#9A8F80;padding-left:12px;line-height:1.5;}
+  .area-foot{display:flex;align-items:center;padding-left:12px;margin-top:0.7rem;padding-top:0.6rem;border-top:1px solid #EAE4DC;gap:8px;}
+  .prog-wrap{flex:1;height:4px;background:#E8E0D4;border-radius:4px;overflow:hidden;}
+  .prog-fill{height:100%;border-radius:4px;}
+  .pct{font-size:10px;color:#A09080;min-width:28px;text-align:right;}
+
+  /* TASKS */
+  .task-row{display:flex;align-items:center;gap:9px;margin-bottom:7px;padding:7px 10px;border-radius:8px;background:#F5EFE6;transition:background 0.1s;}
+  .task-row:hover{background:#EFE8DC;}
+  .chk{width:16px;height:16px;border-radius:50%;border:1.5px solid #C4A882;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all 0.15s;}
+  .chk.done{background:#C4A882;border-color:#C4A882;}
+  .chk.done::after{content:'✓';font-size:9px;color:#fff;line-height:1;}
+  .task-txt{font-size:12.5px;color:#5C4E3D;flex:1;}
+  .task-txt.done{text-decoration:line-through;color:#A09080;}
+  .task-tag{font-size:10px;padding:2px 8px;border-radius:8px;background:#EDE8DF;color:#8A7E6E;}
+  .add-row{display:flex;gap:7px;margin-top:10px;}
+  .add-inp{flex:1;border:1px solid #D0C8BB;border-radius:8px;background:#FFFCF8;padding:7px 10px;font-size:12px;color:#3A3228;font-family:inherit;outline:none;}
+  .add-inp:focus{border-color:#C4A882;}
+  .add-sel{border:1px solid #D0C8BB;border-radius:8px;background:#FFFCF8;padding:7px 8px;font-size:12px;color:#7A6A58;font-family:inherit;outline:none;max-width:120px;}
+  .add-btn{background:#C4A882;border:none;border-radius:8px;padding:7px 16px;font-size:13px;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;transition:opacity 0.15s;}
+  .add-btn:hover{opacity:0.85;}
+
+  /* PROYECTOS */
+  .proj-card{background:#FFFCF8;border:1px solid #E2D9CE;border-radius:12px;padding:0.9rem 1.1rem;margin-bottom:9px;transition:border-color 0.15s;}
+  .proj-card:hover{border-color:#C4A882;}
+  .proj-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .proj-name{font-size:13px;font-weight:600;color:#3A3228;}
+  .proj-bar{height:6px;background:#E8E0D4;border-radius:4px;overflow:hidden;margin-bottom:5px;}
+  .proj-bar-fill{height:100%;border-radius:4px;background:#C4A882;}
+  .proj-meta{font-size:11px;color:#A09080;display:flex;justify-content:space-between;}
+
+  /* HÁBITOS */
+  .day-labels-row{display:flex;align-items:center;gap:4px;padding-left:160px;margin-bottom:5px;}
+  .day-lbl{width:22px;text-align:center;font-size:9px;color:#B0A090;letter-spacing:0.04em;font-weight:600;}
+  .hab-row{display:flex;align-items:center;gap:4px;margin-bottom:9px;}
+  .hab-label{font-size:12px;color:#5C4E3D;min-width:156px;flex-shrink:0;}
+  .dots{display:flex;gap:4px;}
+  .dot{width:22px;height:22px;border-radius:50%;border:1px solid #D8D0C4;background:#F0EBE2;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:#C0B0A0;transition:all 0.15s;}
+  .dot:hover{border-color:#C4A882;}
+  .dot.on{background:#C4A882;border-color:#C4A882;color:#fff;}
+  .hab-streak{font-size:10px;color:#A09080;min-width:50px;text-align:right;padding-left:8px;}
+
+  /* FINANZAS */
+  .month-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem;}
+  .m-btn{background:#F0EBE2;border:1px solid #D8D0C4;border-radius:6px;padding:4px 10px;font-size:11px;color:#7A6A58;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+  .m-btn:hover{border-color:#C4A882;}
+  .m-btn.active{background:#C4A882;border-color:#C4A882;color:#fff;font-weight:600;}
+  .fin-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .fin-table th{background:#EDE8DF;color:#7A6A58;font-weight:600;padding:7px 10px;text-align:left;font-size:11px;border-bottom:1px solid #D8D0C4;}
+  .fin-table th.r{text-align:right;}
+  .fin-table td{padding:6px 10px;border-bottom:1px solid #F0EBE2;color:#3A3228;}
+  .fin-table td.r{text-align:right;}
+  .fin-table td input[type=number]{width:90px;border:none;background:transparent;font-size:12px;text-align:right;color:#3A3228;font-family:inherit;padding:0;outline:none;cursor:pointer;}
+  .fin-table td input[type=number]:focus{background:#FFF3E6;border-radius:4px;padding:2px 5px;}
+  .fin-table tr.sec-r td{background:#EDE8DF;font-weight:600;font-size:11px;color:#7A6A58;letter-spacing:0.08em;text-transform:uppercase;}
+  .fin-table tr.tot-r td{background:#F5EFE6;font-weight:600;color:#5C4E3D;border-top:1px solid #D8D0C4;}
+  .fin-table tr.pos-r td.r{color:#5A8A5A;}
+  .fin-table tr.neg-r td.r{color:#A05050;}
+  .fin-table tr:not(.sec-r):not(.tot-r):hover td{background:#FDF9F4;}
+
+  /* CALENDARIO */
+  .cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .cal-nav-btn{background:#EDE8DF;border:1px solid #D0C8BB;border-radius:8px;padding:5px 14px;font-size:14px;color:#7A6A58;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+  .cal-nav-btn:hover{border-color:#C4A882;color:#5C4E3D;}
+  .cal-title-txt{font-family:'Playfair Display',Georgia,serif;font-size:18px;color:#3A3228;font-weight:400;}
+  .cal-grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+  .cal-dname{text-align:center;font-size:10px;color:#A09080;letter-spacing:0.06em;padding:4px 0;text-transform:uppercase;font-weight:600;}
+  .cal-cell{min-height:72px;background:#FFFCF8;border:1px solid #EAE4DC;border-radius:8px;padding:5px 6px;cursor:pointer;transition:all 0.15s;}
+  .cal-cell:hover{border-color:#C4A882;background:#FFF8F0;}
+  .cal-cell.today{border-color:#C4A882;border-width:2px;}
+  .cal-cell.other{background:#F5F1EB;opacity:0.6;}
+  .cal-dnum{font-size:11px;color:#A09080;font-weight:600;}
+  .cal-cell.today .cal-dnum{color:#C4A882;}
+  .cal-cnote{font-size:9.5px;color:#7A6A58;margin-top:3px;line-height:1.35;word-break:break-word;}
+  .cal-dot-s{width:5px;height:5px;border-radius:50%;background:#C4A882;display:inline-block;margin-right:3px;vertical-align:middle;}
+  .note-panel{background:#F5EFE6;border:1px solid #D8D0C4;border-radius:12px;padding:1rem 1.1rem;margin-top:1rem;}
+  .note-panel-title{font-family:'Playfair Display',Georgia,serif;font-size:15px;color:#5C4E3D;margin-bottom:0.6rem;font-weight:400;}
+  .note-ta{width:100%;border:1px solid #D0C8BB;border-radius:8px;background:#FFFCF8;padding:9px 11px;font-size:13px;color:#3A3228;font-family:inherit;resize:vertical;min-height:70px;outline:none;line-height:1.6;}
+  .note-ta:focus{border-color:#C4A882;}
+  .note-actions{display:flex;gap:8px;margin-top:8px;}
+  .save-btn{background:#C4A882;border:none;border-radius:8px;padding:6px 18px;font-size:12px;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;}
+  .save-btn:hover{opacity:0.85;}
+  .cancel-btn{background:#EDE8DF;border:none;border-radius:8px;padding:6px 18px;font-size:12px;color:#7A6A58;cursor:pointer;font-family:inherit;}
+
+  /* BIENESTAR */
+  .reflect-card{background:#FFFCF8;border:1px solid #E2D9CE;border-radius:12px;padding:1rem 1.1rem;margin-bottom:10px;}
+  .reflect-label{font-size:12px;font-weight:600;color:#5C4E3D;margin-bottom:6px;}
+  .reflect-ta{width:100%;border:1px solid #D0C8BB;border-radius:8px;background:#F5EFE6;padding:8px 10px;font-size:12px;color:#3A3228;font-family:inherit;resize:vertical;min-height:55px;outline:none;}
+  .reflect-ta:focus{border-color:#C4A882;}
+  .mood-row{display:flex;gap:6px;margin-bottom:10px;}
+  .mood-btn{flex:1;background:#F0EBE2;border:1px solid #D8D0C4;border-radius:8px;padding:8px 4px;font-size:13px;cursor:pointer;text-align:center;transition:all 0.15s;font-family:inherit;}
+  .mood-btn:hover{border-color:#C4A882;}
+  .mood-btn.sel{background:#C4A882;border-color:#C4A882;color:#fff;}
+  .mood-label{font-size:10px;color:#A09080;display:block;margin-top:2px;}
+
+  /* QUOTE */
+  .quote-block{margin-top:1.5rem;text-align:center;padding:1.25rem;background:#F5EFE6;border-radius:12px;border:1px solid #E0D8CC;}
+  .quote-text{font-family:'Playfair Display',Georgia,serif;font-size:14px;color:#7A6A58;font-style:italic;line-height:1.7;}
+  .quote-author{font-size:10px;color:#B0A090;margin-top:0.5rem;letter-spacing:0.08em;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">Mi Sistema de Vida</div>
+    <div class="topbar-sub" id="topbar-date"></div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goTo('dashboard',this)">Dashboard</button>
+    <button class="nav-btn" onclick="goTo('productividad',this)">Productividad</button>
+    <button class="nav-btn" onclick="goTo('habitos',this)">Hábitos</button>
+    <button class="nav-btn" onclick="goTo('bienestar',this)">Bienestar</button>
+    <button class="nav-btn" onclick="goTo('finanzas',this)">Finanzas</button>
+    <button class="nav-btn" onclick="goTo('calendario',this)">Calendario</button>
+  </nav>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="grid4" style="margin-bottom:1.25rem;">
+    <div class="metric"><div class="ml">Áreas activas</div><div class="mv">8</div></div>
+    <div class="metric"><div class="ml">Hábitos hoy</div><div class="mv" id="d-hab">—</div></div>
+    <div class="metric"><div class="ml">Tareas pendientes</div><div class="mv" id="d-tasks">—</div></div>
+    <div class="metric"><div class="ml">Trimestre</div><div class="mv">Q2 2026</div></div>
+  </div>
+  <div class="sec-label">Áreas del sistema</div>
+  <div class="grid2" id="areas-grid"></div>
+  <div class="quote-block">
+    <div class="quote-text">"No eres el resultado de un momento de inspiración.<br>Eres el resultado de tus sistemas."</div>
+    <div class="quote-author">— Reflexión del sistema</div>
+  </div>
+</div>
+
+<!-- PRODUCTIVIDAD -->
+<div class="page" id="page-productividad">
+  <div class="grid2" style="align-items:start;">
+    <div>
+      <div class="sec-label">Tareas de hoy</div>
+      <div class="panel" id="tasks-panel"></div>
+    </div>
+    <div>
+      <div class="sec-label">Proyectos activos</div>
+      <div id="projects-panel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HÁBITOS -->
+<div class="page" id="page-habitos">
+  <div class="sec-label">Tracker semanal — haz clic en cada círculo para registrar</div>
+  <div class="panel">
+    <div class="day-labels-row" id="day-labels"></div>
+    <div id="habits-list"></div>
+  </div>
+  <div class="sec-label">Resumen de la semana</div>
+  <div class="grid4" id="hab-stats"></div>
+</div>
+
+<!-- BIENESTAR -->
+<div class="page" id="page-bienestar">
+  <div class="sec-label">¿Cómo te sientes hoy?</div>
+  <div class="panel">
+    <div class="mood-row" id="mood-row"></div>
+  </div>
+  <div class="sec-label">Reflexión diaria</div>
+  <div class="grid2">
+    <div class="reflect-card">
+      <div class="reflect-label">¿Qué salió bien hoy?</div>
+      <textarea class="reflect-ta" placeholder="Escribe aquí..."></textarea>
+    </div>
+    <div class="reflect-card">
+      <div class="reflect-label">¿Qué quiero mejorar mañana?</div>
+      <textarea class="reflect-ta" placeholder="Escribe aquí..."></textarea>
+    </div>
+    <div class="reflect-card">
+      <div class="reflect-label">Intención del día / afirmación</div>
+      <textarea class="reflect-ta" placeholder="Hoy decido..."></textarea>
+    </div>
+    <div class="reflect-card">
+      <div class="reflect-label">Nivel de energía y notas</div>
+      <textarea class="reflect-ta" placeholder="Cómo estuvo mi energía, sueño, estrés..."></textarea>
+    </div>
+  </div>
+  <div class="sec-label" style="margin-top:0.5rem;">Meditación y respiración</div>
+  <div class="panel">
+    <div class="reflect-label" style="margin-bottom:8px;">Notas de meditación de hoy</div>
+    <textarea class="reflect-ta" style="min-height:80px;" placeholder="Duración, técnica utilizada, observaciones..."></textarea>
+  </div>
+</div>
+
+<!-- FINANZAS -->
+<div class="page" id="page-finanzas">
+  <div class="grid4" style="margin-bottom:1.1rem;">
+    <div class="metric"><div class="ml">Ingreso total</div><div class="mv" id="f-ingreso">$0</div></div>
+    <div class="metric"><div class="ml">Costos fijos</div><div class="mv neg" id="f-costos">$0</div></div>
+    <div class="metric"><div class="ml">Gastos</div><div class="mv neg" id="f-gastos">$0</div></div>
+    <div class="metric"><div class="ml">Utilidad</div><div class="mv" id="f-util">$0</div></div>
+  </div>
+  <div class="month-tabs" id="month-tabs"></div>
+  <div class="panel">
+    <div id="fin-table-wrap"></div>
+  </div>
+</div>
+
+<!-- CALENDARIO -->
+<div class="page" id="page-calendario">
+  <div class="panel">
+    <div class="cal-hdr">
+      <button class="cal-nav-btn" id="cal-prev">&#8592;</button>
+      <span class="cal-title-txt" id="cal-title"></span>
+      <button class="cal-nav-btn" id="cal-next">&#8594;</button>
+    </div>
+    <div class="cal-grid7" id="cal-dnames"></div>
+    <div class="cal-grid7" style="margin-top:3px;" id="cal-cells"></div>
+  </div>
+  <div id="note-panel-wrap"></div>
+</div>
+
+<script>
+const MONTHS_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const SHORT_M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const DAY_NAMES_CAL=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DAY_ABBR=['L','M','X','J','V','S','D'];
+
+const now = new Date();
+const months_name = MONTHS_ES[now.getMonth()];
+document.getElementById('topbar-date').textContent = `${now.getDate()} de ${months_name} de ${now.getFullYear()} · Semana ${getWeek(now)}`;
+
+function getWeek(d){const s=new Date(d.getFullYear(),0,1);return Math.ceil(((d-s)/86400000+s.getDay()+1)/7);}
+
+function goTo(id, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── ÁREAS ──
+const AREAS=[
+  {n:'01',title:'Visión y Metas',desc:'Identidad → objetivos macro → hitos trimestrales → acciones inmediatas cuantificables',pct:80,badge:'active',c:'#C4A882'},
+  {n:'02',title:'Productividad y Ejecución',desc:'Gestión de tareas priorizadas, calendario y seguimiento de proyectos QA y personales',pct:65,badge:'active',c:'#A8B4A0'},
+  {n:'03',title:'Hábitos y Rutinas',desc:'Monitoreo de micro-acciones diarias para la transformación con efecto compuesto',pct:90,badge:'active',c:'#B4A8C8'},
+  {n:'04',title:'Estilo de Vida y Entorno',desc:'Gestión del hogar como santuario que minimiza la fatiga de decisión',pct:50,badge:'review',c:'#C8B0A0'},
+  {n:'05',title:'Fitness y Arquitectura Corporal',desc:'Diseño y seguimiento matemático de rutinas de fuerza y resistencia',pct:72,badge:'active',c:'#A0B8C0'},
+  {n:'06',title:'Nutrición e Ingeniería Metabólica',desc:'Control macro y planificación semanal orientada a energía cognitiva de élite',pct:60,badge:'active',c:'#C0B880'},
+  {n:'07',title:'Bienestar y Reflexión Profunda',desc:'Meditaciones, evaluaciones emocionales y herramientas de alineación mental',pct:40,badge:'pending',c:'#D4A8A8'},
+  {n:'08',title:'Ingeniería Financiera',desc:'Patrimonio, flujo de caja, presupuestos e inversión a largo plazo',pct:55,badge:'active',c:'#98A8B8'},
+];
+const BADGE_MAP={active:'Activo',review:'Revisar',pending:'En pausa'};
+const BADGE_CLS={active:'badge-a',review:'badge-r',pending:'badge-p'};
+
+function renderAreas(){
+  document.getElementById('areas-grid').innerHTML=AREAS.map(a=>`
+    <div class="area-card">
+      <div style="position:absolute;top:0;left:0;width:4px;height:100%;background:${a.c};border-radius:14px 0 0 14px;"></div>
+      <div class="area-top"><span class="area-num">${a.n}</span><span class="badge ${BADGE_CLS[a.badge]}">${BADGE_MAP[a.badge]}</span></div>
+      <div class="area-title">${a.title}</div>
+      <div class="area-desc">${a.desc}</div>
+      <div class="area-foot">
+        <div class="prog-wrap"><div class="prog-fill" style="width:${a.pct}%;background:${a.c};"></div></div>
+        <span class="pct">${a.pct}%</span>
+      </div>
+    </div>`).join('');
+}
+
+// ── TAREAS ──
+let tasks=[
+  {text:'Revisar test cases del sprint',done:false,tag:'QA'},
+  {text:'Planificación de comidas semana siguiente',done:false,tag:'Nutrición'},
+  {text:'Actualizar tracker de inversiones',done:false,tag:'Finanzas'},
+  {text:'Sesión de entrenamiento B',done:false,tag:'Fitness'},
+  {text:'Reflexión semanal · 15 min',done:false,tag:'Bienestar'},
+];
+
+function renderTasks(){
+  const p=document.getElementById('tasks-panel');
+  p.innerHTML=tasks.map((t,i)=>`
+    <div class="task-row">
+      <div class="chk${t.done?' done':''}" onclick="toggleTask(${i})"></div>
+      <span class="task-txt${t.done?' done':''}">${t.text}</span>
+      <span class="task-tag">${t.tag}</span>
+    </div>`).join('');
+  const row=document.createElement('div');
+  row.className='add-row';
+  row.innerHTML=`<input class="add-inp" id="new-task-inp" placeholder="Nueva tarea..."><select class="add-sel" id="new-task-tag"><option>QA</option><option>Finanzas</option><option>Fitness</option><option>Nutrición</option><option>Bienestar</option><option>Personal</option><option>Hogar</option></select><button class="add-btn" onclick="addTask()">+</button>`;
+  p.appendChild(row);
+  document.getElementById('d-tasks').textContent=tasks.filter(t=>!t.done).length;
+}
+
+function toggleTask(i){tasks[i].done=!tasks[i].done;renderTasks();}
+function addTask(){
+  const v=document.getElementById('new-task-inp').value.trim();
+  const tag=document.getElementById('new-task-tag').value;
+  if(!v)return;
+  tasks.push({text:v,done:false,tag});
+  renderTasks();
+}
+
+// ── PROYECTOS ──
+const PROJECTS=[
+  {name:'Sprint QA — App móvil v3.2',pct:68,status:'En progreso',due:'30 Abr'},
+  {name:'Documentación de procesos QA',pct:30,status:'Iniciado',due:'15 May'},
+  {name:'Plan de ahorro Q2 2026',pct:50,status:'En progreso',due:'30 Jun'},
+  {name:'Routine de fuerza 12 semanas',pct:83,status:'Avanzado',due:'10 May'},
+];
+
+function renderProjects(){
+  document.getElementById('projects-panel').innerHTML=PROJECTS.map(pr=>`
+    <div class="proj-card">
+      <div class="proj-head"><span class="proj-name">${pr.name}</span><span class="badge badge-a">${pr.status}</span></div>
+      <div class="proj-bar"><div class="proj-bar-fill" style="width:${pr.pct}%"></div></div>
+      <div class="proj-meta"><span>${pr.pct}% completado</span><span>Vence ${pr.due}</span></div>
+    </div>`).join('');
+}
+
+// ── HÁBITOS ──
+let HABITS=[
+  {label:'Meditación mañanera',days:[1,1,1,1,1,0,0]},
+  {label:'Entrenamiento de fuerza',days:[1,0,1,1,0,0,0]},
+  {label:'Lectura 30 min',days:[1,1,1,1,1,0,0]},
+  {label:'Registro nutricional',days:[1,1,0,1,1,0,0]},
+  {label:'Revisión financiera',days:[0,0,0,1,0,0,0]},
+  {label:'Journaling',days:[1,0,1,0,1,0,0]},
+  {label:'Sin azúcar añadida',days:[1,1,1,0,1,0,0]},
+  {label:'8 vasos de agua',days:[1,1,1,1,0,0,0]},
+];
+
+function calcStreak(days){let s=0;for(let i=days.length-1;i>=0;i--){if(days[i])s++;else break;}return s;}
+
+function renderHabits(){
+  document.getElementById('day-labels').innerHTML=DAY_ABBR.map(d=>`<div class="day-lbl">${d}</div>`).join('');
+  document.getElementById('habits-list').innerHTML=HABITS.map((h,hi)=>`
+    <div class="hab-row">
+      <span class="hab-label">${h.label}</span>
+      <div class="dots">${h.days.map((d,di)=>`<div class="dot${d?' on':''}" onclick="toggleDot(${hi},${di})">${d?'✓':''}</div>`).join('')}</div>
+      <span class="hab-streak">${calcStreak(h.days)}d racha</span>
+    </div>`).join('');
+  renderHabStats();
+}
+
+function toggleDot(hi,di){HABITS[hi].days[di]=HABITS[hi].days[di]?0:1;renderHabits();updateDashHab();}
+
+function renderHabStats(){
+  const todayIdx=4;
+  const done=HABITS.filter(h=>h.days[todayIdx]).length;
+  const total=HABITS.length;
+  const pct=Math.round(done/total*100);
+  const bestStreak=Math.max(...HABITS.map(h=>calcStreak(h.days)));
+  const weekAvg=Math.round(HABITS.reduce((s,h)=>s+h.days.reduce((a,b)=>a+b,0),0)/HABITS.length*100/7);
+  document.getElementById('hab-stats').innerHTML=`
+    <div class="metric"><div class="ml">Completados hoy</div><div class="mv">${done}/${total}</div></div>
+    <div class="metric"><div class="ml">% del día</div><div class="mv pos">${pct}%</div></div>
+    <div class="metric"><div class="ml">Mejor racha</div><div class="mv">${bestStreak}d</div></div>
+    <div class="metric"><div class="ml">Promedio semana</div><div class="mv">${weekAvg}%</div></div>`;
+}
+
+function updateDashHab(){
+  const todayIdx=4;
+  const done=HABITS.filter(h=>h.days[todayIdx]).length;
+  document.getElementById('d-hab').textContent=Math.round(done/HABITS.length*100)+'%';
+}
+
+// ── BIENESTAR / MOOD ──
+const MOODS=[{e:'😞',l:'Difícil'},{e:'😐',l:'Regular'},{e:'🙂',l:'Bien'},{e:'😊',l:'Muy bien'},{e:'✨',l:'Excelente'}];
+let selMood=null;
+function renderMood(){
+  document.getElementById('mood-row').innerHTML=MOODS.map((m,i)=>`
+    <div class="mood-btn${selMood===i?' sel':''}" onclick="selectMood(${i})">
+      <span style="font-size:20px;">${m.e}</span>
+      <span class="mood-label">${m.l}</span>
+    </div>`).join('');
+}
+function selectMood(i){selMood=i;renderMood();}
+
+// ── FINANZAS ──
+const FIN_ROWS=[
+  {type:'sec',label:'Ingresos fijos'},
+  {key:'ingreso',label:'Total ingreso'},
+  {type:'sec',label:'Costo fijo'},
+  {key:'arriendo',label:'Arriendo'},{key:'internet',label:'Internet / finca'},
+  {key:'personal',label:'Personal'},{key:'ahorro',label:'Ahorro / Apto'},
+  {key:'gym',label:'Gym'},{key:'celular',label:'Celular'},{key:'transporte',label:'Transporte'},
+  {type:'sec',label:'Costos variables'},
+  {key:'telefono',label:'Teléfono'},{key:'julio',label:'Julio'},
+  {key:'claudia',label:'Claudia'},{key:'apple',label:'Apple'},{key:'fitness_a',label:'Fitness apple'},
+  {type:'tot',label:'Total costos',id:'tc'},
+  {type:'sec',label:'Gastos'},
+  {key:'ropa',label:'Ropa'},{key:'tarjeta',label:'Tarjeta de crédito'},
+  {key:'salidas',label:'Salidas'},{key:'toefl',label:'TOEFL'},
+  {key:'regalos',label:'Regalos'},{key:'locion',label:'Loción'},
+  {key:'netflix',label:'Netflix'},{key:'cita_med',label:'Cita médica'},{key:'otros',label:'Otros'},
+  {type:'tot',label:'Total gastos',id:'tg'},
+  {type:'sec',label:'Inversiones'},
+  {key:'inversion',label:'Total inversiones'},
+  {type:'tot',label:'Utilidad neta',id:'util',hi:true},
+];
+
+let finData={};
+for(let m=0;m<12;m++){
+  finData[m]={ingreso:3306,arriendo:600,internet:70,personal:200,ahorro:0,gym:94,celular:40,transporte:120,telefono:700,julio:300,claudia:75,apple:13,fitness_a:20,ropa:0,tarjeta:0,salidas:0,toefl:0,regalos:0,locion:0,netflix:0,cita_med:0,otros:0,inversion:0};
+}
+finData[1].arriendo=800; finData[4].ahorro=1500; finData[5].ahorro=700; finData[5].ingreso=5000; finData[5].tarjeta=700;
+let curFinMonth=now.getMonth();
+
+function fmtUSD(n){return '$'+Math.round(n).toLocaleString('en-US');}
+function finTotals(m){
+  const d=finData[m];
+  const costos=['arriendo','internet','personal','ahorro','gym','celular','transporte','telefono','julio','claudia','apple','fitness_a'].reduce((s,k)=>s+(+d[k]||0),0);
+  const gastos=['ropa','tarjeta','salidas','toefl','regalos','locion','netflix','cita_med','otros'].reduce((s,k)=>s+(+d[k]||0),0);
+  const util=(+d.ingreso||0)-costos-gastos-(+d.inversion||0);
+  return {costos,gastos,util,ingreso:+d.ingreso||0};
+}
+
+function renderFinMetrics(m){
+  const {costos,gastos,util,ingreso}=finTotals(m);
+  document.getElementById('f-ingreso').textContent=fmtUSD(ingreso);
+  document.getElementById('f-costos').textContent=fmtUSD(costos);
+  document.getElementById('f-gastos').textContent=fmtUSD(gastos);
+  const u=document.getElementById('f-util');
+  u.textContent=fmtUSD(util);
+  u.className='mv '+(util>=0?'pos':'neg');
+}
+
+function renderFinTable(m){
+  const d=finData[m];
+  const {costos,gastos,util}=finTotals(m);
+  let html='<table class="fin-table"><thead><tr><th style="width:55%">Concepto</th><th class="r" style="width:45%">Monto</th></tr></thead><tbody>';
+  FIN_ROWS.forEach(row=>{
+    if(row.type==='sec'){
+      html+=`<tr class="sec-r"><td colspan="2">${row.label}</td></tr>`;
+    }else if(row.type==='tot'){
+      const val=row.id==='tc'?costos:row.id==='tg'?gastos:util;
+      const cls=row.id==='util'?(val>=0?'pos-r':'neg-r'):'';
+      html+=`<tr class="tot-r ${cls}"><td>${row.label}</td><td class="r">${fmtUSD(val)}</td></tr>`;
+    }else{
+      html+=`<tr><td>${row.label}</td><td class="r"><input type="number" data-key="${row.key}" value="${d[row.key]||0}" min="0"></td></tr>`;
+    }
+  });
+  html+='</tbody></table>';
+  document.getElementById('fin-table-wrap').innerHTML=html;
+  document.querySelectorAll('#fin-table-wrap input[type=number]').forEach(inp=>{
+    inp.addEventListener('input',e=>{
+      finData[m][e.target.dataset.key]=+e.target.value||0;
+      renderFinMetrics(m);
+      rebuildFinTotals(m);
+    });
+  });
+}
+
+function rebuildFinTotals(m){
+  const {costos,gastos,util}=finTotals(m);
+  document.querySelectorAll('#fin-table-wrap .tot-r').forEach(tr=>{
+    const lbl=tr.cells[0].textContent.trim().toLowerCase();
+    const val=lbl.includes('costos')?costos:lbl.includes('gastos')?gastos:util;
+    tr.cells[1].textContent=fmtUSD(val);
+    tr.classList.remove('pos-r','neg-r');
+    if(lbl.includes('utilidad'))tr.classList.add(val>=0?'pos-r':'neg-r');
+  });
+}
+
+function renderMonthTabs(){
+  document.getElementById('month-tabs').innerHTML=SHORT_M.map((m,i)=>`<button class="m-btn${i===curFinMonth?' active':''}" onclick="switchFinMonth(${i})">${m}</button>`).join('');
+}
+
+function switchFinMonth(i){curFinMonth=i;renderMonthTabs();renderFinTable(i);renderFinMetrics(i);}
+
+// ── CALENDARIO ──
+let calMonth=now.getMonth();
+let calYear=now.getFullYear();
+let calNotes={};
+let editingKey=null;
+
+function renderCalendar(){
+  document.getElementById('cal-title').textContent=MONTHS_ES[calMonth]+' '+calYear;
+  document.getElementById('cal-dnames').innerHTML=DAY_NAMES_CAL.map(d=>`<div class="cal-dname">${d}</div>`).join('');
+  const cells=document.getElementById('cal-cells');
+  cells.innerHTML='';
+  const first=new Date(calYear,calMonth,1).getDay();
+  const last=new Date(calYear,calMonth+1,0).getDate();
+  for(let i=0;i<first;i++){
+    const pd=new Date(calYear,calMonth,-first+i+1).getDate();
+    const c=document.createElement('div');c.className='cal-cell other';
+    c.innerHTML=`<div class="cal-dnum">${pd}</div>`;cells.appendChild(c);
+  }
+  for(let d=1;d<=last;d++){
+    const isToday=now.getDate()===d&&now.getMonth()===calMonth&&now.getFullYear()===calYear;
+    const key=`${calYear}-${calMonth}-${d}`;
+    const note=calNotes[key]||'';
+    const c=document.createElement('div');
+    c.className='cal-cell'+(isToday?' today':'');
+    c.innerHTML=`<div class="cal-dnum">${d}</div>${note?`<div class="cal-cnote"><span class="cal-dot-s"></span>${note.substring(0,35)}${note.length>35?'…':''}</div>`:''}`;
+    c.onclick=()=>openNote(key,d);
+    cells.appendChild(c);
+  }
+  const rem=(first+last)%7;
+  if(rem>0){for(let d=1;d<=7-rem;d++){const c=document.createElement('div');c.className='cal-cell other';c.innerHTML=`<div class="cal-dnum">${d}</div>`;cells.appendChild(c);}}
+  if(!editingKey)document.getElementById('note-panel-wrap').innerHTML='';
+}
+
+function openNote(key,day){
+  editingKey=key;
+  document.getElementById('note-panel-wrap').innerHTML=`
+    <div class="note-panel">
+      <div class="note-panel-title">Nota · ${day} de ${MONTHS_ES[calMonth]}</div>
+      <textarea class="note-ta" id="note-ta" placeholder="Escribe tu nota, evento o recordatorio...">${calNotes[key]||''}</textarea>
+      <div class="note-actions">
+        <button class="save-btn" onclick="saveNote()">Guardar nota</button>
+        <button class="cancel-btn" onclick="cancelNote()">Cancelar</button>
+      </div>
+    </div>`;
+  document.getElementById('note-ta').focus();
+}
+
+function saveNote(){
+  if(editingKey){calNotes[editingKey]=document.getElementById('note-ta').value.trim();}
+  editingKey=null;document.getElementById('note-panel-wrap').innerHTML='';renderCalendar();
+}
+function cancelNote(){editingKey=null;document.getElementById('note-panel-wrap').innerHTML='';renderCalendar();}
+
+document.getElementById('cal-prev').onclick=()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();};
+document.getElementById('cal-next').onclick=()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();};
+
+// ── INIT ──
+renderAreas();
+renderTasks();
+renderProjects();
+renderHabits();
+renderMood();
+updateDashHab();
+renderMonthTabs();
+renderFinTable(curFinMonth);
+renderFinMetrics(curFinMonth);
+renderCalendar();
+</script>
+</body>
+</html>
