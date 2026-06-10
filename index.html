@@ -3,581 +3,636 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi Sistema de Vida</title>
+<title>Mi Dashboard Personal</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:#FAF8F4;font-family:'Segoe UI',system-ui,sans-serif;color:#3A3228;min-height:100vh;}
-
-  .topbar{background:#FAF8F4;border-bottom:1px solid #E2D9CE;padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
-  .topbar-title{font-family:'Playfair Display',Georgia,serif;font-size:20px;color:#3A3228;font-weight:400;}
-  .topbar-sub{font-size:11px;color:#A09080;margin-top:2px;}
-  .nav{display:flex;gap:2px;background:#EDE8DF;border-radius:8px;padding:3px;}
-  .nav-btn{background:transparent;border:none;border-radius:6px;padding:6px 13px;font-size:12px;color:#7A6A58;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s;}
-  .nav-btn:hover{background:#FAF8F4;}
-  .nav-btn.active{background:#FAF8F4;color:#3A3228;font-weight:600;border:1px solid #D8D0C4;}
-
-  .page{display:none;padding:1.5rem;max-width:1100px;margin:0 auto;}
-  .page.active{display:block;}
-
-  .sec-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#9A8F7E;margin-bottom:0.6rem;margin-top:1.25rem;}
-  .sec-label:first-child{margin-top:0;}
-  .panel{background:#FFFCF8;border:1px solid #E2D9CE;border-radius:14px;padding:1.1rem 1.25rem;margin-bottom:1rem;}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-
-  .metric{background:#F5EFE6;border-radius:10px;padding:0.75rem 1rem;text-align:center;}
-  .metric .ml{font-size:10px;color:#A09080;letter-spacing:0.06em;text-transform:uppercase;}
-  .metric .mv{font-size:22px;font-weight:600;color:#5C4E3D;margin-top:3px;}
-  .mv.pos{color:#5A8A5A;} .mv.neg{color:#A05050;}
-
-  .badge{font-size:10px;padding:2px 9px;border-radius:10px;font-weight:600;}
-  .badge-a{background:#E4EEE0;color:#4A7A4A;}
-  .badge-r{background:#EEE4D8;color:#8A6840;}
-  .badge-p{background:#EAE4EE;color:#705880;}
-
-  /* ÁREAS */
-  .area-card{background:#FFFCF8;border:1px solid #E2D9CE;border-radius:14px;padding:1rem 1.1rem 0.85rem;position:relative;overflow:hidden;transition:border-color 0.15s;}
-  .area-card:hover{border-color:#C4A882;}
-  .area-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;}
-  .area-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.3rem;padding-left:12px;}
-  .area-num{font-size:10px;color:#C0B0A0;letter-spacing:0.06em;}
-  .area-title{font-family:'Playfair Display',Georgia,serif;font-size:14px;color:#3A3228;padding-left:12px;margin-bottom:4px;font-weight:400;}
-  .area-desc{font-size:11.5px;color:#9A8F80;padding-left:12px;line-height:1.5;}
-  .area-foot{display:flex;align-items:center;padding-left:12px;margin-top:0.7rem;padding-top:0.6rem;border-top:1px solid #EAE4DC;gap:8px;}
-  .prog-wrap{flex:1;height:4px;background:#E8E0D4;border-radius:4px;overflow:hidden;}
-  .prog-fill{height:100%;border-radius:4px;}
-  .pct{font-size:10px;color:#A09080;min-width:28px;text-align:right;}
-
-  /* TASKS */
-  .task-row{display:flex;align-items:center;gap:9px;margin-bottom:7px;padding:7px 10px;border-radius:8px;background:#F5EFE6;transition:background 0.1s;}
-  .task-row:hover{background:#EFE8DC;}
-  .chk{width:16px;height:16px;border-radius:50%;border:1.5px solid #C4A882;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all 0.15s;}
-  .chk.done{background:#C4A882;border-color:#C4A882;}
-  .chk.done::after{content:'✓';font-size:9px;color:#fff;line-height:1;}
-  .task-txt{font-size:12.5px;color:#5C4E3D;flex:1;}
-  .task-txt.done{text-decoration:line-through;color:#A09080;}
-  .task-tag{font-size:10px;padding:2px 8px;border-radius:8px;background:#EDE8DF;color:#8A7E6E;}
-  .add-row{display:flex;gap:7px;margin-top:10px;}
-  .add-inp{flex:1;border:1px solid #D0C8BB;border-radius:8px;background:#FFFCF8;padding:7px 10px;font-size:12px;color:#3A3228;font-family:inherit;outline:none;}
-  .add-inp:focus{border-color:#C4A882;}
-  .add-sel{border:1px solid #D0C8BB;border-radius:8px;background:#FFFCF8;padding:7px 8px;font-size:12px;color:#7A6A58;font-family:inherit;outline:none;max-width:120px;}
-  .add-btn{background:#C4A882;border:none;border-radius:8px;padding:7px 16px;font-size:13px;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;transition:opacity 0.15s;}
-  .add-btn:hover{opacity:0.85;}
-
-  /* PROYECTOS */
-  .proj-card{background:#FFFCF8;border:1px solid #E2D9CE;border-radius:12px;padding:0.9rem 1.1rem;margin-bottom:9px;transition:border-color 0.15s;}
-  .proj-card:hover{border-color:#C4A882;}
-  .proj-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-  .proj-name{font-size:13px;font-weight:600;color:#3A3228;}
-  .proj-bar{height:6px;background:#E8E0D4;border-radius:4px;overflow:hidden;margin-bottom:5px;}
-  .proj-bar-fill{height:100%;border-radius:4px;background:#C4A882;}
-  .proj-meta{font-size:11px;color:#A09080;display:flex;justify-content:space-between;}
-
-  /* HÁBITOS */
-  .day-labels-row{display:flex;align-items:center;gap:4px;padding-left:160px;margin-bottom:5px;}
-  .day-lbl{width:22px;text-align:center;font-size:9px;color:#B0A090;letter-spacing:0.04em;font-weight:600;}
-  .hab-row{display:flex;align-items:center;gap:4px;margin-bottom:9px;}
-  .hab-label{font-size:12px;color:#5C4E3D;min-width:156px;flex-shrink:0;}
-  .dots{display:flex;gap:4px;}
-  .dot{width:22px;height:22px;border-radius:50%;border:1px solid #D8D0C4;background:#F0EBE2;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:#C0B0A0;transition:all 0.15s;}
-  .dot:hover{border-color:#C4A882;}
-  .dot.on{background:#C4A882;border-color:#C4A882;color:#fff;}
-  .hab-streak{font-size:10px;color:#A09080;min-width:50px;text-align:right;padding-left:8px;}
-
-  /* FINANZAS */
-  .month-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:1rem;}
-  .m-btn{background:#F0EBE2;border:1px solid #D8D0C4;border-radius:6px;padding:4px 10px;font-size:11px;color:#7A6A58;cursor:pointer;font-family:inherit;transition:all 0.15s;}
-  .m-btn:hover{border-color:#C4A882;}
-  .m-btn.active{background:#C4A882;border-color:#C4A882;color:#fff;font-weight:600;}
-  .fin-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-  .fin-table th{background:#EDE8DF;color:#7A6A58;font-weight:600;padding:7px 10px;text-align:left;font-size:11px;border-bottom:1px solid #D8D0C4;}
-  .fin-table th.r{text-align:right;}
-  .fin-table td{padding:6px 10px;border-bottom:1px solid #F0EBE2;color:#3A3228;}
-  .fin-table td.r{text-align:right;}
-  .fin-table td input[type=number]{width:90px;border:none;background:transparent;font-size:12px;text-align:right;color:#3A3228;font-family:inherit;padding:0;outline:none;cursor:pointer;}
-  .fin-table td input[type=number]:focus{background:#FFF3E6;border-radius:4px;padding:2px 5px;}
-  .fin-table tr.sec-r td{background:#EDE8DF;font-weight:600;font-size:11px;color:#7A6A58;letter-spacing:0.08em;text-transform:uppercase;}
-  .fin-table tr.tot-r td{background:#F5EFE6;font-weight:600;color:#5C4E3D;border-top:1px solid #D8D0C4;}
-  .fin-table tr.pos-r td.r{color:#5A8A5A;}
-  .fin-table tr.neg-r td.r{color:#A05050;}
-  .fin-table tr:not(.sec-r):not(.tot-r):hover td{background:#FDF9F4;}
-
-  /* CALENDARIO */
-  .cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
-  .cal-nav-btn{background:#EDE8DF;border:1px solid #D0C8BB;border-radius:8px;padding:5px 14px;font-size:14px;color:#7A6A58;cursor:pointer;font-family:inherit;transition:all 0.15s;}
-  .cal-nav-btn:hover{border-color:#C4A882;color:#5C4E3D;}
-  .cal-title-txt{font-family:'Playfair Display',Georgia,serif;font-size:18px;color:#3A3228;font-weight:400;}
-  .cal-grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
-  .cal-dname{text-align:center;font-size:10px;color:#A09080;letter-spacing:0.06em;padding:4px 0;text-transform:uppercase;font-weight:600;}
-  .cal-cell{min-height:72px;background:#FFFCF8;border:1px solid #EAE4DC;border-radius:8px;padding:5px 6px;cursor:pointer;transition:all 0.15s;}
-  .cal-cell:hover{border-color:#C4A882;background:#FFF8F0;}
-  .cal-cell.today{border-color:#C4A882;border-width:2px;}
-  .cal-cell.other{background:#F5F1EB;opacity:0.6;}
-  .cal-dnum{font-size:11px;color:#A09080;font-weight:600;}
-  .cal-cell.today .cal-dnum{color:#C4A882;}
-  .cal-cnote{font-size:9.5px;color:#7A6A58;margin-top:3px;line-height:1.35;word-break:break-word;}
-  .cal-dot-s{width:5px;height:5px;border-radius:50%;background:#C4A882;display:inline-block;margin-right:3px;vertical-align:middle;}
-  .note-panel{background:#F5EFE6;border:1px solid #D8D0C4;border-radius:12px;padding:1rem 1.1rem;margin-top:1rem;}
-  .note-panel-title{font-family:'Playfair Display',Georgia,serif;font-size:15px;color:#5C4E3D;margin-bottom:0.6rem;font-weight:400;}
-  .note-ta{width:100%;border:1px solid #D0C8BB;border-radius:8px;background:#FFFCF8;padding:9px 11px;font-size:13px;color:#3A3228;font-family:inherit;resize:vertical;min-height:70px;outline:none;line-height:1.6;}
-  .note-ta:focus{border-color:#C4A882;}
-  .note-actions{display:flex;gap:8px;margin-top:8px;}
-  .save-btn{background:#C4A882;border:none;border-radius:8px;padding:6px 18px;font-size:12px;color:#fff;cursor:pointer;font-family:inherit;font-weight:600;}
-  .save-btn:hover{opacity:0.85;}
-  .cancel-btn{background:#EDE8DF;border:none;border-radius:8px;padding:6px 18px;font-size:12px;color:#7A6A58;cursor:pointer;font-family:inherit;}
-
-  /* BIENESTAR */
-  .reflect-card{background:#FFFCF8;border:1px solid #E2D9CE;border-radius:12px;padding:1rem 1.1rem;margin-bottom:10px;}
-  .reflect-label{font-size:12px;font-weight:600;color:#5C4E3D;margin-bottom:6px;}
-  .reflect-ta{width:100%;border:1px solid #D0C8BB;border-radius:8px;background:#F5EFE6;padding:8px 10px;font-size:12px;color:#3A3228;font-family:inherit;resize:vertical;min-height:55px;outline:none;}
-  .reflect-ta:focus{border-color:#C4A882;}
-  .mood-row{display:flex;gap:6px;margin-bottom:10px;}
-  .mood-btn{flex:1;background:#F0EBE2;border:1px solid #D8D0C4;border-radius:8px;padding:8px 4px;font-size:13px;cursor:pointer;text-align:center;transition:all 0.15s;font-family:inherit;}
-  .mood-btn:hover{border-color:#C4A882;}
-  .mood-btn.sel{background:#C4A882;border-color:#C4A882;color:#fff;}
-  .mood-label{font-size:10px;color:#A09080;display:block;margin-top:2px;}
-
-  /* QUOTE */
-  .quote-block{margin-top:1.5rem;text-align:center;padding:1.25rem;background:#F5EFE6;border-radius:12px;border:1px solid #E0D8CC;}
-  .quote-text{font-family:'Playfair Display',Georgia,serif;font-size:14px;color:#7A6A58;font-style:italic;line-height:1.7;}
-  .quote-author{font-size:10px;color:#B0A090;margin-top:0.5rem;letter-spacing:0.08em;}
+  :root {
+    --bg: #ffffff; --bg2: #f5f5f3; --bg3: #efefed;
+    --text: #1a1a1a; --text2: #6b6b6b; --text3: #a0a0a0;
+    --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.2);
+    --radius: 8px; --radius-lg: 12px;
+    --blue: #185FA5; --green: #3B6D11; --amber: #854F0B; --red: #A32D2D; --purple: #534AB7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1e1e1e; --bg2: #2a2a2a; --bg3: #333333;
+      --text: #f0f0f0; --text2: #a0a0a0; --text3: #666666;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
+  .container { max-width: 900px; margin: 0 auto; padding: 1.5rem 1rem; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .topbar h1 { font-size: 20px; font-weight: 600; }
+  .topbar span { font-size: 12px; color: var(--text2); }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .tab { padding: 7px 18px; border-radius: 20px; border: 0.5px solid var(--border2); font-size: 13px; cursor: pointer; background: var(--bg); color: var(--text2); transition: all 0.15s; }
+  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .tab:hover:not(.active) { background: var(--bg2); }
+  .sec { display: none; }
+  .sec.on { display: block; }
+  .mgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .mc { background: var(--bg2); border-radius: var(--radius); padding: 14px 16px; }
+  .mc-lbl { font-size: 11px; color: var(--text2); margin-bottom: 5px; }
+  .mc-val { font-size: 22px; font-weight: 600; color: var(--text); }
+  .mc-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .ctitle { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 7px; }
+  .ctitle i { font-size: 15px; color: var(--text2); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 600px) { .two { grid-template-columns: 1fr; } }
+  table { width: 100%; font-size: 12px; border-collapse: collapse; }
+  th { text-align: left; padding: 5px 8px; color: var(--text2); font-weight: 500; border-bottom: 0.5px solid var(--border); font-size: 11px; }
+  td { padding: 7px 8px; border-bottom: 0.5px solid var(--border); color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+  .bg { background: #EAF3DE; color: #3B6D11; }
+  .ba { background: #FAEEDA; color: #854F0B; }
+  .br { background: #FCEBEB; color: #A32D2D; }
+  .bb { background: #E6F1FB; color: #185FA5; }
+  .bgr { background: #F1EFE8; color: #5F5E5A; }
+  .bpu { background: #EEEDFE; color: #534AB7; }
+  .pw { height: 6px; background: var(--bg2); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+  .pf { height: 100%; border-radius: 3px; }
+  .irow { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .irow input, .irow select, .irow textarea { flex: 1; min-width: 90px; font-size: 12px; padding: 7px 10px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); outline: none; }
+  .irow input:focus, .irow select:focus { border-color: var(--blue); }
+  button { padding: 7px 14px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  button:hover { background: var(--bg2); }
+  .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .fbtn { padding: 4px 12px; border-radius: 12px; border: 0.5px solid var(--border); font-size: 11px; cursor: pointer; background: transparent; color: var(--text2); }
+  .fbtn.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .cw { position: relative; width: 100%; height: 220px; }
+  .cw-sm { position: relative; width: 100%; height: 180px; }
+  .sep { height: 0.5px; background: var(--border); margin: .75rem 0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+  .leg-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text2); }
+  .leg-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+  .empty { font-size: 12px; color: var(--text3); text-align: center; padding: 20px; }
+  .insight { background: var(--bg2); border-radius: var(--radius); padding: 10px 14px; font-size: 12px; color: var(--text2); margin-bottom: 8px; border-left: 3px solid var(--blue); }
+  .csv-note { font-size: 11px; color: var(--text3); margin-top: 6px; line-height: 1.5; }
+  .prog-row { margin-bottom: 10px; }
+  .prog-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+  textarea { width: 100%; font-size: 12px; padding: 10px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); resize: vertical; min-height: 70px; outline: none; font-family: inherit; }
 </style>
 </head>
 <body>
+<div class="container">
+  <div class="topbar">
+    <h1>Mi dashboard</h1>
+    <span id="fhoy"></span>
+  </div>
 
-<div class="topbar">
-  <div>
-    <div class="topbar-title">Mi Sistema de Vida</div>
-    <div class="topbar-sub" id="topbar-date"></div>
+  <div class="tabs">
+    <button class="tab active" onclick="sw('fin',this)"><i class="ti ti-coin"></i> Finanzas</button>
+    <button class="tab" onclick="sw('car',this)"><i class="ti ti-chart-line"></i> Carrera</button>
+    <button class="tab" onclick="sw('edu',this)"><i class="ti ti-school"></i> Educación</button>
+    <button class="tab" onclick="sw('lec',this)"><i class="ti ti-book"></i> Lecturas</button>
+    <button class="tab" onclick="sw('fit',this)"><i class="ti ti-barbell"></i> Fitness</button>
+    <button class="tab" onclick="sw('per',this)"><i class="ti ti-plant"></i> Crecimiento</button>
   </div>
-  <nav class="nav">
-    <button class="nav-btn active" onclick="goTo('dashboard',this)">Dashboard</button>
-    <button class="nav-btn" onclick="goTo('productividad',this)">Productividad</button>
-    <button class="nav-btn" onclick="goTo('habitos',this)">Hábitos</button>
-    <button class="nav-btn" onclick="goTo('bienestar',this)">Bienestar</button>
-    <button class="nav-btn" onclick="goTo('finanzas',this)">Finanzas</button>
-    <button class="nav-btn" onclick="goTo('calendario',this)">Calendario</button>
-  </nav>
-</div>
 
-<!-- DASHBOARD -->
-<div class="page active" id="page-dashboard">
-  <div class="grid4" style="margin-bottom:1.25rem;">
-    <div class="metric"><div class="ml">Áreas activas</div><div class="mv">8</div></div>
-    <div class="metric"><div class="ml">Hábitos hoy</div><div class="mv" id="d-hab">—</div></div>
-    <div class="metric"><div class="ml">Tareas pendientes</div><div class="mv" id="d-tasks">—</div></div>
-    <div class="metric"><div class="ml">Trimestre</div><div class="mv">Q2 2026</div></div>
-  </div>
-  <div class="sec-label">Áreas del sistema</div>
-  <div class="grid2" id="areas-grid"></div>
-  <div class="quote-block">
-    <div class="quote-text">"No eres el resultado de un momento de inspiración.<br>Eres el resultado de tus sistemas."</div>
-    <div class="quote-author">— Reflexión del sistema</div>
-  </div>
-</div>
-
-<!-- PRODUCTIVIDAD -->
-<div class="page" id="page-productividad">
-  <div class="grid2" style="align-items:start;">
-    <div>
-      <div class="sec-label">Tareas de hoy</div>
-      <div class="panel" id="tasks-panel"></div>
+  <!-- FINANZAS -->
+  <div id="s-fin" class="sec on">
+    <div class="mgrid">
+      <div class="mc"><div class="mc-lbl">Ingresos mes</div><div class="mc-val" id="f-ing">$0</div><div class="mc-sub">COP</div></div>
+      <div class="mc"><div class="mc-lbl">Gastos mes</div><div class="mc-val" id="f-gas">$0</div><div class="mc-sub">COP</div></div>
+      <div class="mc"><div class="mc-lbl">Ahorro / inversión</div><div class="mc-val" id="f-aho">$0</div><div class="mc-sub">COP</div></div>
+      <div class="mc"><div class="mc-lbl">Balance</div><div class="mc-val" id="f-bal">$0</div><div class="mc-sub">disponible</div></div>
     </div>
-    <div>
-      <div class="sec-label">Proyectos activos</div>
-      <div id="projects-panel"></div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-upload"></i> Cargar CSV desde Google Sheets</div>
+      <input type="file" id="csv-input" accept=".csv" style="font-size:12px">
+      <p class="csv-note">Exporta tu Sheets como CSV (Archivo → Descargar → CSV) y súbelo aquí.<br>Columnas: Fecha, Tipo de Movimiento, Monto, Categoría, Subcategoría, Método de pago, Tipo de gasto, Notas</p>
     </div>
-  </div>
-</div>
-
-<!-- HÁBITOS -->
-<div class="page" id="page-habitos">
-  <div class="sec-label">Tracker semanal — haz clic en cada círculo para registrar</div>
-  <div class="panel">
-    <div class="day-labels-row" id="day-labels"></div>
-    <div id="habits-list"></div>
-  </div>
-  <div class="sec-label">Resumen de la semana</div>
-  <div class="grid4" id="hab-stats"></div>
-</div>
-
-<!-- BIENESTAR -->
-<div class="page" id="page-bienestar">
-  <div class="sec-label">¿Cómo te sientes hoy?</div>
-  <div class="panel">
-    <div class="mood-row" id="mood-row"></div>
-  </div>
-  <div class="sec-label">Reflexión diaria</div>
-  <div class="grid2">
-    <div class="reflect-card">
-      <div class="reflect-label">¿Qué salió bien hoy?</div>
-      <textarea class="reflect-ta" placeholder="Escribe aquí..."></textarea>
+    <div id="fin-insights"></div>
+    <div class="two">
+      <div class="card">
+        <div class="ctitle"><i class="ti ti-chart-pie"></i> Gastos por categoría</div>
+        <div class="legend" id="pie-legend"></div>
+        <div class="cw"><canvas id="pie-chart" role="img" aria-label="Gastos por categoría"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ctitle"><i class="ti ti-chart-bar"></i> Ingresos vs gastos</div>
+        <div class="cw"><canvas id="bar-chart" role="img" aria-label="Ingresos vs gastos mensuales"></canvas></div>
+      </div>
     </div>
-    <div class="reflect-card">
-      <div class="reflect-label">¿Qué quiero mejorar mañana?</div>
-      <textarea class="reflect-ta" placeholder="Escribe aquí..."></textarea>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-chart-line"></i> Evolución mensual</div>
+      <div class="cw"><canvas id="line-chart" role="img" aria-label="Evolución mensual"></canvas></div>
     </div>
-    <div class="reflect-card">
-      <div class="reflect-label">Intención del día / afirmación</div>
-      <textarea class="reflect-ta" placeholder="Hoy decido..."></textarea>
-    </div>
-    <div class="reflect-card">
-      <div class="reflect-label">Nivel de energía y notas</div>
-      <textarea class="reflect-ta" placeholder="Cómo estuvo mi energía, sueño, estrés..."></textarea>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-receipt"></i> Movimientos</div>
+      <div class="filter-bar" id="fin-filtros"></div>
+      <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Método</th><th>Tipo gasto</th><th style="text-align:right">Monto</th></tr></thead>
+      <tbody id="fin-tbody"><tr><td colspan="6" class="empty">Carga tu CSV para ver los movimientos</td></tr></tbody></table>
     </div>
   </div>
-  <div class="sec-label" style="margin-top:0.5rem;">Meditación y respiración</div>
-  <div class="panel">
-    <div class="reflect-label" style="margin-bottom:8px;">Notas de meditación de hoy</div>
-    <textarea class="reflect-ta" style="min-height:80px;" placeholder="Duración, técnica utilizada, observaciones..."></textarea>
-  </div>
-</div>
 
-<!-- FINANZAS -->
-<div class="page" id="page-finanzas">
-  <div class="grid4" style="margin-bottom:1.1rem;">
-    <div class="metric"><div class="ml">Ingreso total</div><div class="mv" id="f-ingreso">$0</div></div>
-    <div class="metric"><div class="ml">Costos fijos</div><div class="mv neg" id="f-costos">$0</div></div>
-    <div class="metric"><div class="ml">Gastos</div><div class="mv neg" id="f-gastos">$0</div></div>
-    <div class="metric"><div class="ml">Utilidad</div><div class="mv" id="f-util">$0</div></div>
-  </div>
-  <div class="month-tabs" id="month-tabs"></div>
-  <div class="panel">
-    <div id="fin-table-wrap"></div>
-  </div>
-</div>
-
-<!-- CALENDARIO -->
-<div class="page" id="page-calendario">
-  <div class="panel">
-    <div class="cal-hdr">
-      <button class="cal-nav-btn" id="cal-prev">&#8592;</button>
-      <span class="cal-title-txt" id="cal-title"></span>
-      <button class="cal-nav-btn" id="cal-next">&#8594;</button>
+  <!-- CARRERA -->
+  <div id="s-car" class="sec">
+    <div class="mgrid">
+      <div class="mc"><div class="mc-lbl">Semana del plan</div><div class="mc-val" id="c-sem">—</div><div class="mc-sub">de 8</div></div>
+      <div class="mc"><div class="mc-lbl">Aplicaciones</div><div class="mc-val" id="c-apps">0</div></div>
+      <div class="mc"><div class="mc-lbl">Logros este mes</div><div class="mc-val" id="c-log">0</div></div>
+      <div class="mc"><div class="mc-lbl">Networking</div><div class="mc-val" id="c-net">0</div><div class="mc-sub">contactos</div></div>
     </div>
-    <div class="cal-grid7" id="cal-dnames"></div>
-    <div class="cal-grid7" style="margin-top:3px;" id="cal-cells"></div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-progress"></i> Progreso plan Data Analyst</div>
+      <div id="car-skills-prog">
+        <div class="prog-row"><div class="prog-label"><span>SQL intermedio</span><span id="pct-sql">75%</span></div><div class="pw"><div class="pf" id="bar-sql" style="width:75%;background:#185FA5"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Python / Pandas</span><span id="pct-py">40%</span></div><div class="pw"><div class="pf" id="bar-py" style="width:40%;background:#185FA5"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Tableau Public</span><span id="pct-tab">20%</span></div><div class="pw"><div class="pf" id="bar-tab" style="width:20%;background:#185FA5"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Proyecto portafolio (turismo CO)</span><span id="pct-port">10%</span></div><div class="pw"><div class="pf" id="bar-port" style="width:10%;background:#185FA5"></div></div></div>
+        <div class="prog-row"><div class="prog-label"><span>Power BI / Looker</span><span id="pct-bi">0%</span></div><div class="pw"><div class="pf" id="bar-bi" style="width:0%;background:#185FA5"></div></div></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="editarPct()">Actualizar porcentajes</button>
+      </div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="ctitle"><i class="ti ti-briefcase"></i> Pipeline laboral</div>
+        <table>
+          <thead><tr><th>Empresa</th><th>Rol</th><th>Estado</th></tr></thead>
+          <tbody id="car-pipeline"><tr><td colspan="3" class="empty">Sin aplicaciones</td></tr></tbody>
+        </table>
+        <div class="irow" style="margin-top:10px">
+          <input type="text" id="car-emp" placeholder="Empresa">
+          <input type="text" id="car-rol" placeholder="Rol">
+          <select id="car-est">
+            <option>Enviada</option><option>En proceso</option>
+            <option>Entrevista</option><option>Rechazada</option><option>Oferta</option>
+          </select>
+          <button onclick="addApp()">+</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ctitle"><i class="ti ti-users"></i> Networking</div>
+        <table>
+          <thead><tr><th>Nombre</th><th>Empresa</th><th>Rol</th></tr></thead>
+          <tbody id="car-net"><tr><td colspan="3" class="empty">Sin contactos</td></tr></tbody>
+        </table>
+        <div class="irow" style="margin-top:10px">
+          <input type="text" id="net-nombre" placeholder="Nombre">
+          <input type="text" id="net-empresa" placeholder="Empresa">
+          <input type="text" id="net-rol" placeholder="Rol">
+          <button onclick="addNet()">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-star"></i> Logros y aprendizajes</div>
+      <div id="car-logros-lista" style="font-size:12px;color:var(--text2)">Sin logros aún.</div>
+      <div class="irow" style="margin-top:8px">
+        <input type="text" id="car-logro" placeholder="¿Qué lograste o aprendiste hoy?">
+        <button onclick="addLogro()">Guardar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-notes"></i> Notas sobre la transición</div>
+      <div id="car-notas-lista" style="font-size:12px;color:var(--text2)">Sin notas.</div>
+      <div class="irow" style="margin-top:8px">
+        <input type="text" id="car-nota" placeholder="Nota, insight o recordatorio">
+        <button onclick="addNotaCar()">+</button>
+      </div>
+    </div>
   </div>
-  <div id="note-panel-wrap"></div>
+
+  <!-- EDUCACIÓN -->
+  <div id="s-edu" class="sec">
+    <div class="mgrid">
+      <div class="mc"><div class="mc-lbl">En curso</div><div class="mc-val" id="e-cur">0</div></div>
+      <div class="mc"><div class="mc-lbl">Completados</div><div class="mc-val" id="e-comp">0</div></div>
+      <div class="mc"><div class="mc-lbl">Pendientes</div><div class="mc-val" id="e-pend">0</div></div>
+      <div class="mc"><div class="mc-lbl">Globant obligatorios</div><div class="mc-val" id="e-glob">0</div></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-plus"></i> Agregar curso</div>
+      <div class="irow">
+        <input type="text" id="e-nombre" placeholder="Nombre del curso">
+        <input type="text" id="e-plat" placeholder="Plataforma">
+        <select id="e-tipo">
+          <option value="Globant obligatorio">Globant obligatorio</option>
+          <option value="Personal - Data">Personal — Data</option>
+          <option value="Personal - Otros">Personal — Otros</option>
+          <option value="Certificación">Certificación</option>
+        </select>
+        <select id="e-est">
+          <option value="Pendiente">Pendiente</option>
+          <option value="En curso">En curso</option>
+          <option value="Completado">Completado</option>
+          <option value="Pausado">Pausado</option>
+        </select>
+        <input type="number" id="e-pct" placeholder="% avance" min="0" max="100" style="max-width:80px">
+        <input type="text" id="e-notas" placeholder="Notas">
+        <button onclick="addCurso()">Agregar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-list"></i> Mis cursos</div>
+      <div class="filter-bar">
+        <button class="fbtn on" onclick="filterEdu('todos',this)">Todos</button>
+        <button class="fbtn" onclick="filterEdu('En curso',this)">En curso</button>
+        <button class="fbtn" onclick="filterEdu('Pendiente',this)">Pendiente</button>
+        <button class="fbtn" onclick="filterEdu('Completado',this)">Completado</button>
+        <button class="fbtn" onclick="filterEdu('Globant obligatorio',this)">Globant</button>
+        <button class="fbtn" onclick="filterEdu('Personal - Data',this)">Personal Data</button>
+      </div>
+      <table>
+        <thead><tr><th>Curso</th><th>Plataforma</th><th>Tipo</th><th>Estado</th><th>Avance</th><th>Notas</th><th></th></tr></thead>
+        <tbody id="edu-tbody"><tr><td colspan="7" class="empty">Sin cursos aún</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-bulb"></i> Temas en el radar</div>
+      <div id="temas-lista" style="padding:4px 0;min-height:30px"></div>
+      <div class="irow" style="margin-top:8px">
+        <input type="text" id="tema-nuevo" placeholder="Tema o habilidad que no quiero perder de vista">
+        <button onclick="addTema()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LECTURAS -->
+  <div id="s-lec" class="sec">
+    <div class="mgrid">
+      <div class="mc"><div class="mc-lbl">Leyendo</div><div class="mc-val" id="l-ley">0</div></div>
+      <div class="mc"><div class="mc-lbl">Leídos</div><div class="mc-val" id="l-lei">0</div></div>
+      <div class="mc"><div class="mc-lbl">Por leer</div><div class="mc-val" id="l-por">0</div></div>
+      <div class="mc"><div class="mc-lbl">Meta anual</div><div class="mc-val" id="l-meta">0/12</div></div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="ctitle"><i class="ti ti-chart-pie"></i> Por categoría</div>
+        <div class="cw-sm"><canvas id="lec-pie" role="img" aria-label="Libros por categoría"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="ctitle"><i class="ti ti-chart-bar"></i> Por estado</div>
+        <div class="cw-sm"><canvas id="lec-bar" role="img" aria-label="Libros por estado"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-plus"></i> Agregar libro</div>
+      <div class="irow">
+        <input type="text" id="l-tit" placeholder="Título">
+        <input type="text" id="l-aut" placeholder="Autor">
+        <select id="l-cat">
+          <option value="Negocios">Negocios</option>
+          <option value="Datos / Tecnología">Datos / Tecnología</option>
+          <option value="Filosofía">Filosofía</option>
+          <option value="Desarrollo personal">Desarrollo personal</option>
+          <option value="Novela">Novela</option>
+          <option value="Finanzas">Finanzas</option>
+          <option value="Otro">Otro</option>
+        </select>
+        <select id="l-est">
+          <option value="Por leer">Por leer</option>
+          <option value="Leyendo">Leyendo</option>
+          <option value="Leído">Leído</option>
+          <option value="Abandonado">Abandonado</option>
+        </select>
+        <input type="number" id="l-rating" placeholder="Rating 1-5" min="1" max="5" style="max-width:80px">
+        <button onclick="addLibro()">Agregar</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-books"></i> Biblioteca</div>
+      <div class="filter-bar">
+        <button class="fbtn on" onclick="filterLec('todos',this)">Todos</button>
+        <button class="fbtn" onclick="filterLec('Leyendo',this)">Leyendo</button>
+        <button class="fbtn" onclick="filterLec('Por leer',this)">Por leer</button>
+        <button class="fbtn" onclick="filterLec('Leído',this)">Leídos</button>
+        <button class="fbtn" onclick="filterLec('Abandonado',this)">Abandonados</button>
+      </div>
+      <table>
+        <thead><tr><th>Título</th><th>Autor</th><th>Categoría</th><th>Estado</th><th>Rating</th><th></th></tr></thead>
+        <tbody id="lec-tbody"><tr><td colspan="6" class="empty">Sin libros aún</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FITNESS -->
+  <div id="s-fit" class="sec">
+    <div class="mgrid">
+      <div class="mc"><div class="mc-lbl">Peso actual</div><div class="mc-val" id="fit-p">—</div><div class="mc-sub">kg</div></div>
+      <div class="mc"><div class="mc-lbl">Meta</div><div class="mc-val" id="fit-mp">—</div><div class="mc-sub">kg</div></div>
+      <div class="mc"><div class="mc-lbl">Días gym (sem)</div><div class="mc-val" id="fit-d">0/5</div></div>
+      <div class="mc"><div class="mc-lbl">Racha</div><div class="mc-val" id="fit-r">0</div><div class="mc-sub">días</div></div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="ctitle"><i class="ti ti-calendar-check"></i> Esta semana</div>
+        <div id="fit-streak" style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <button style="flex:1" onclick="gymHoy(true)">Fui hoy</button>
+          <button style="flex:1" onclick="gymHoy(false)">No fui</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ctitle"><i class="ti ti-ruler"></i> Registro de peso</div>
+        <div class="irow">
+          <input type="number" id="fit-pinput" placeholder="Peso (kg)" step="0.1">
+          <input type="number" id="fit-minput" placeholder="Meta (kg)" step="0.1">
+          <button onclick="savePeso()">Guardar</button>
+        </div>
+        <div class="cw-sm"><canvas id="fit-chart" role="img" aria-label="Evolución peso"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-notes"></i> Notas de entreno</div>
+      <div id="fit-notas" style="font-size:12px;color:var(--text2)">Sin notas.</div>
+      <div class="irow" style="margin-top:8px">
+        <input type="text" id="fit-nota-i" placeholder="Ej. Pierna — sentadilla 60kg x10">
+        <button onclick="addNotaFit()">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CRECIMIENTO -->
+  <div id="s-per" class="sec">
+    <div class="mgrid">
+      <div class="mc"><div class="mc-lbl">Hábitos activos</div><div class="mc-val" id="p-hab">0</div></div>
+      <div class="mc"><div class="mc-lbl">Completados hoy</div><div class="mc-val" id="p-hoy">0</div></div>
+      <div class="mc"><div class="mc-lbl">Reflexiones</div><div class="mc-val" id="p-ref">0</div></div>
+      <div class="mc"><div class="mc-lbl">Metas activas</div><div class="mc-val" id="p-met">0</div></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-repeat"></i> Hábitos diarios</div>
+      <div id="hab-lista"></div>
+      <div class="irow" style="margin-top:8px">
+        <input type="text" id="hab-new" placeholder="Nuevo hábito">
+        <button onclick="addHabito()">+</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-writing"></i> Reflexión del día</div>
+      <textarea id="ref-txt" placeholder="¿Qué aprendiste hoy sobre ti misma?"></textarea>
+      <button style="margin-top:8px" onclick="saveRef()">Guardar reflexión</button>
+      <div style="height:0.5px;background:var(--border);margin:.75rem 0"></div>
+      <div id="ref-lista" style="font-size:12px;color:var(--text2)">Sin reflexiones.</div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><i class="ti ti-target"></i> Metas personales</div>
+      <div id="metas-lista"></div>
+      <div class="irow" style="margin-top:8px">
+        <input type="text" id="meta-txt" placeholder="Nueva meta">
+        <select id="meta-plazo">
+          <option value="Corto">Corto plazo</option>
+          <option value="Mediano">Mediano plazo</option>
+          <option value="Largo">Largo plazo</option>
+        </select>
+        <button onclick="addMeta()">+</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-const MONTHS_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-const SHORT_M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const DAY_NAMES_CAL=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-const DAY_ABBR=['L','M','X','J','V','S','D'];
+const hoy = new Date();
+document.getElementById('fhoy').textContent = hoy.toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-const now = new Date();
-const months_name = MONTHS_ES[now.getMonth()];
-document.getElementById('topbar-date').textContent = `${now.getDate()} de ${months_name} de ${now.getFullYear()} · Semana ${getWeek(now)}`;
+const COLORS=['#185FA5','#639922','#BA7517','#D4537E','#534AB7','#D85A30','#0F6E56','#993556','#3B6D11','#854F0B','#1D9E75','#7F77DD'];
 
-function getWeek(d){const s=new Date(d.getFullYear(),0,1);return Math.ceil(((d-s)/86400000+s.getDay()+1)/7);}
+let D = {
+  fin:[], car:{ apps:[], logros:[], notas:[], networking:[], skills:{sql:75,py:40,tab:20,port:10,bi:0} },
+  edu:{ cursos:[], temas:[] }, lec:[], 
+  fit:{ pesos:[], gym:[], notas:[], meta:null },
+  per:{ habitos:[], reflexiones:[], metas:[] }
+};
+try{ const r=localStorage.getItem('dani_dash'); if(r) D=JSON.parse(r); }catch(e){}
+const save=()=>{ try{ localStorage.setItem('dani_dash',JSON.stringify(D)); }catch(e){} };
 
-function goTo(id, btn){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
+function sw(id,btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('on');
   btn.classList.add('active');
+  if(id==='lec') setTimeout(()=>{ renderLecCharts(); },100);
+  if(id==='fit') setTimeout(renderFitChart,100);
+  if(id==='car') renderCar();
 }
 
-// ── ÁREAS ──
-const AREAS=[
-  {n:'01',title:'Visión y Metas',desc:'Identidad → objetivos macro → hitos trimestrales → acciones inmediatas cuantificables',pct:80,badge:'active',c:'#C4A882'},
-  {n:'02',title:'Productividad y Ejecución',desc:'Gestión de tareas priorizadas, calendario y seguimiento de proyectos QA y personales',pct:65,badge:'active',c:'#A8B4A0'},
-  {n:'03',title:'Hábitos y Rutinas',desc:'Monitoreo de micro-acciones diarias para la transformación con efecto compuesto',pct:90,badge:'active',c:'#B4A8C8'},
-  {n:'04',title:'Estilo de Vida y Entorno',desc:'Gestión del hogar como santuario que minimiza la fatiga de decisión',pct:50,badge:'review',c:'#C8B0A0'},
-  {n:'05',title:'Fitness y Arquitectura Corporal',desc:'Diseño y seguimiento matemático de rutinas de fuerza y resistencia',pct:72,badge:'active',c:'#A0B8C0'},
-  {n:'06',title:'Nutrición e Ingeniería Metabólica',desc:'Control macro y planificación semanal orientada a energía cognitiva de élite',pct:60,badge:'active',c:'#C0B880'},
-  {n:'07',title:'Bienestar y Reflexión Profunda',desc:'Meditaciones, evaluaciones emocionales y herramientas de alineación mental',pct:40,badge:'pending',c:'#D4A8A8'},
-  {n:'08',title:'Ingeniería Financiera',desc:'Patrimonio, flujo de caja, presupuestos e inversión a largo plazo',pct:55,badge:'active',c:'#98A8B8'},
-];
-const BADGE_MAP={active:'Activo',review:'Revisar',pending:'En pausa'};
-const BADGE_CLS={active:'badge-a',review:'badge-r',pending:'badge-p'};
+const fmt=n=>new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(n);
+let finFiltro='todos', eduFiltro='todos', lecFiltro='todos';
 
-function renderAreas(){
-  document.getElementById('areas-grid').innerHTML=AREAS.map(a=>`
-    <div class="area-card">
-      <div style="position:absolute;top:0;left:0;width:4px;height:100%;background:${a.c};border-radius:14px 0 0 14px;"></div>
-      <div class="area-top"><span class="area-num">${a.n}</span><span class="badge ${BADGE_CLS[a.badge]}">${BADGE_MAP[a.badge]}</span></div>
-      <div class="area-title">${a.title}</div>
-      <div class="area-desc">${a.desc}</div>
-      <div class="area-foot">
-        <div class="prog-wrap"><div class="prog-fill" style="width:${a.pct}%;background:${a.c};"></div></div>
-        <span class="pct">${a.pct}%</span>
-      </div>
-    </div>`).join('');
-}
-
-// ── TAREAS ──
-let tasks=[
-  {text:'Revisar test cases del sprint',done:false,tag:'QA'},
-  {text:'Planificación de comidas semana siguiente',done:false,tag:'Nutrición'},
-  {text:'Actualizar tracker de inversiones',done:false,tag:'Finanzas'},
-  {text:'Sesión de entrenamiento B',done:false,tag:'Fitness'},
-  {text:'Reflexión semanal · 15 min',done:false,tag:'Bienestar'},
-];
-
-function renderTasks(){
-  const p=document.getElementById('tasks-panel');
-  p.innerHTML=tasks.map((t,i)=>`
-    <div class="task-row">
-      <div class="chk${t.done?' done':''}" onclick="toggleTask(${i})"></div>
-      <span class="task-txt${t.done?' done':''}">${t.text}</span>
-      <span class="task-tag">${t.tag}</span>
-    </div>`).join('');
-  const row=document.createElement('div');
-  row.className='add-row';
-  row.innerHTML=`<input class="add-inp" id="new-task-inp" placeholder="Nueva tarea..."><select class="add-sel" id="new-task-tag"><option>QA</option><option>Finanzas</option><option>Fitness</option><option>Nutrición</option><option>Bienestar</option><option>Personal</option><option>Hogar</option></select><button class="add-btn" onclick="addTask()">+</button>`;
-  p.appendChild(row);
-  document.getElementById('d-tasks').textContent=tasks.filter(t=>!t.done).length;
-}
-
-function toggleTask(i){tasks[i].done=!tasks[i].done;renderTasks();}
-function addTask(){
-  const v=document.getElementById('new-task-inp').value.trim();
-  const tag=document.getElementById('new-task-tag').value;
-  if(!v)return;
-  tasks.push({text:v,done:false,tag});
-  renderTasks();
-}
-
-// ── PROYECTOS ──
-const PROJECTS=[
-  {name:'Sprint QA — App móvil v3.2',pct:68,status:'En progreso',due:'30 Abr'},
-  {name:'Documentación de procesos QA',pct:30,status:'Iniciado',due:'15 May'},
-  {name:'Plan de ahorro Q2 2026',pct:50,status:'En progreso',due:'30 Jun'},
-  {name:'Routine de fuerza 12 semanas',pct:83,status:'Avanzado',due:'10 May'},
-];
-
-function renderProjects(){
-  document.getElementById('projects-panel').innerHTML=PROJECTS.map(pr=>`
-    <div class="proj-card">
-      <div class="proj-head"><span class="proj-name">${pr.name}</span><span class="badge badge-a">${pr.status}</span></div>
-      <div class="proj-bar"><div class="proj-bar-fill" style="width:${pr.pct}%"></div></div>
-      <div class="proj-meta"><span>${pr.pct}% completado</span><span>Vence ${pr.due}</span></div>
-    </div>`).join('');
-}
-
-// ── HÁBITOS ──
-let HABITS=[
-  {label:'Meditación mañanera',days:[1,1,1,1,1,0,0]},
-  {label:'Entrenamiento de fuerza',days:[1,0,1,1,0,0,0]},
-  {label:'Lectura 30 min',days:[1,1,1,1,1,0,0]},
-  {label:'Registro nutricional',days:[1,1,0,1,1,0,0]},
-  {label:'Revisión financiera',days:[0,0,0,1,0,0,0]},
-  {label:'Journaling',days:[1,0,1,0,1,0,0]},
-  {label:'Sin azúcar añadida',days:[1,1,1,0,1,0,0]},
-  {label:'8 vasos de agua',days:[1,1,1,1,0,0,0]},
-];
-
-function calcStreak(days){let s=0;for(let i=days.length-1;i>=0;i--){if(days[i])s++;else break;}return s;}
-
-function renderHabits(){
-  document.getElementById('day-labels').innerHTML=DAY_ABBR.map(d=>`<div class="day-lbl">${d}</div>`).join('');
-  document.getElementById('habits-list').innerHTML=HABITS.map((h,hi)=>`
-    <div class="hab-row">
-      <span class="hab-label">${h.label}</span>
-      <div class="dots">${h.days.map((d,di)=>`<div class="dot${d?' on':''}" onclick="toggleDot(${hi},${di})">${d?'✓':''}</div>`).join('')}</div>
-      <span class="hab-streak">${calcStreak(h.days)}d racha</span>
-    </div>`).join('');
-  renderHabStats();
-}
-
-function toggleDot(hi,di){HABITS[hi].days[di]=HABITS[hi].days[di]?0:1;renderHabits();updateDashHab();}
-
-function renderHabStats(){
-  const todayIdx=4;
-  const done=HABITS.filter(h=>h.days[todayIdx]).length;
-  const total=HABITS.length;
-  const pct=Math.round(done/total*100);
-  const bestStreak=Math.max(...HABITS.map(h=>calcStreak(h.days)));
-  const weekAvg=Math.round(HABITS.reduce((s,h)=>s+h.days.reduce((a,b)=>a+b,0),0)/HABITS.length*100/7);
-  document.getElementById('hab-stats').innerHTML=`
-    <div class="metric"><div class="ml">Completados hoy</div><div class="mv">${done}/${total}</div></div>
-    <div class="metric"><div class="ml">% del día</div><div class="mv pos">${pct}%</div></div>
-    <div class="metric"><div class="ml">Mejor racha</div><div class="mv">${bestStreak}d</div></div>
-    <div class="metric"><div class="ml">Promedio semana</div><div class="mv">${weekAvg}%</div></div>`;
-}
-
-function updateDashHab(){
-  const todayIdx=4;
-  const done=HABITS.filter(h=>h.days[todayIdx]).length;
-  document.getElementById('d-hab').textContent=Math.round(done/HABITS.length*100)+'%';
-}
-
-// ── BIENESTAR / MOOD ──
-const MOODS=[{e:'😞',l:'Difícil'},{e:'😐',l:'Regular'},{e:'🙂',l:'Bien'},{e:'😊',l:'Muy bien'},{e:'✨',l:'Excelente'}];
-let selMood=null;
-function renderMood(){
-  document.getElementById('mood-row').innerHTML=MOODS.map((m,i)=>`
-    <div class="mood-btn${selMood===i?' sel':''}" onclick="selectMood(${i})">
-      <span style="font-size:20px;">${m.e}</span>
-      <span class="mood-label">${m.l}</span>
-    </div>`).join('');
-}
-function selectMood(i){selMood=i;renderMood();}
-
-// ── FINANZAS ──
-const FIN_ROWS=[
-  {type:'sec',label:'Ingresos fijos'},
-  {key:'ingreso',label:'Total ingreso'},
-  {type:'sec',label:'Costo fijo'},
-  {key:'arriendo',label:'Arriendo'},{key:'internet',label:'Internet / finca'},
-  {key:'personal',label:'Personal'},{key:'ahorro',label:'Ahorro / Apto'},
-  {key:'gym',label:'Gym'},{key:'celular',label:'Celular'},{key:'transporte',label:'Transporte'},
-  {type:'sec',label:'Costos variables'},
-  {key:'telefono',label:'Teléfono'},{key:'julio',label:'Julio'},
-  {key:'claudia',label:'Claudia'},{key:'apple',label:'Apple'},{key:'fitness_a',label:'Fitness apple'},
-  {type:'tot',label:'Total costos',id:'tc'},
-  {type:'sec',label:'Gastos'},
-  {key:'ropa',label:'Ropa'},{key:'tarjeta',label:'Tarjeta de crédito'},
-  {key:'salidas',label:'Salidas'},{key:'toefl',label:'TOEFL'},
-  {key:'regalos',label:'Regalos'},{key:'locion',label:'Loción'},
-  {key:'netflix',label:'Netflix'},{key:'cita_med',label:'Cita médica'},{key:'otros',label:'Otros'},
-  {type:'tot',label:'Total gastos',id:'tg'},
-  {type:'sec',label:'Inversiones'},
-  {key:'inversion',label:'Total inversiones'},
-  {type:'tot',label:'Utilidad neta',id:'util',hi:true},
-];
-
-let finData={};
-for(let m=0;m<12;m++){
-  finData[m]={ingreso:3306,arriendo:600,internet:70,personal:200,ahorro:0,gym:94,celular:40,transporte:120,telefono:700,julio:300,claudia:75,apple:13,fitness_a:20,ropa:0,tarjeta:0,salidas:0,toefl:0,regalos:0,locion:0,netflix:0,cita_med:0,otros:0,inversion:0};
-}
-finData[1].arriendo=800; finData[4].ahorro=1500; finData[5].ahorro=700; finData[5].ingreso=5000; finData[5].tarjeta=700;
-let curFinMonth=now.getMonth();
-
-function fmtUSD(n){return '$'+Math.round(n).toLocaleString('en-US');}
-function finTotals(m){
-  const d=finData[m];
-  const costos=['arriendo','internet','personal','ahorro','gym','celular','transporte','telefono','julio','claudia','apple','fitness_a'].reduce((s,k)=>s+(+d[k]||0),0);
-  const gastos=['ropa','tarjeta','salidas','toefl','regalos','locion','netflix','cita_med','otros'].reduce((s,k)=>s+(+d[k]||0),0);
-  const util=(+d.ingreso||0)-costos-gastos-(+d.inversion||0);
-  return {costos,gastos,util,ingreso:+d.ingreso||0};
-}
-
-function renderFinMetrics(m){
-  const {costos,gastos,util,ingreso}=finTotals(m);
-  document.getElementById('f-ingreso').textContent=fmtUSD(ingreso);
-  document.getElementById('f-costos').textContent=fmtUSD(costos);
-  document.getElementById('f-gastos').textContent=fmtUSD(gastos);
-  const u=document.getElementById('f-util');
-  u.textContent=fmtUSD(util);
-  u.className='mv '+(util>=0?'pos':'neg');
-}
-
-function renderFinTable(m){
-  const d=finData[m];
-  const {costos,gastos,util}=finTotals(m);
-  let html='<table class="fin-table"><thead><tr><th style="width:55%">Concepto</th><th class="r" style="width:45%">Monto</th></tr></thead><tbody>';
-  FIN_ROWS.forEach(row=>{
-    if(row.type==='sec'){
-      html+=`<tr class="sec-r"><td colspan="2">${row.label}</td></tr>`;
-    }else if(row.type==='tot'){
-      const val=row.id==='tc'?costos:row.id==='tg'?gastos:util;
-      const cls=row.id==='util'?(val>=0?'pos-r':'neg-r'):'';
-      html+=`<tr class="tot-r ${cls}"><td>${row.label}</td><td class="r">${fmtUSD(val)}</td></tr>`;
-    }else{
-      html+=`<tr><td>${row.label}</td><td class="r"><input type="number" data-key="${row.key}" value="${d[row.key]||0}" min="0"></td></tr>`;
+// CSV
+document.getElementById('csv-input').addEventListener('change',function(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const lines=ev.target.result.split('\n').filter(l=>l.trim());
+    const headers=lines[0].split(',').map(h=>h.trim().replace(/"/g,''));
+    const rows=[];
+    for(let i=1;i<lines.length;i++){
+      const vals=lines[i].split(',').map(v=>v.trim().replace(/"/g,''));
+      const obj={};
+      headers.forEach((h,j)=>obj[h]=vals[j]||'');
+      if(obj['Monto']||obj['monto']) rows.push(obj);
     }
-  });
-  html+='</tbody></table>';
-  document.getElementById('fin-table-wrap').innerHTML=html;
-  document.querySelectorAll('#fin-table-wrap input[type=number]').forEach(inp=>{
-    inp.addEventListener('input',e=>{
-      finData[m][e.target.dataset.key]=+e.target.value||0;
-      renderFinMetrics(m);
-      rebuildFinTotals(m);
-    });
-  });
+    D.fin=rows.map(r=>({
+      fecha:r['Fecha']||'', tipo:r['Tipo de Movimiento']||'',
+      monto:parseFloat((r['Monto']||'0').replace(/[^0-9.-]/g,''))||0,
+      categoria:r['Categoría']||r['Categoria']||'',
+      subcategoria:r['Subcategoría']||r['Subcategoria']||'',
+      metodo:r['Método de pago']||r['Metodo de pago']||'',
+      tipogasto:r['Tipo de gasto']||'', notas:r['Notas']||''
+    }));
+    save(); renderFin();
+  };
+  reader.readAsText(file);
+});
+
+function renderFin(){
+  const mov=D.fin;
+  const ing=mov.filter(m=>m.tipo==='Ingreso').reduce((a,m)=>a+m.monto,0);
+  const gas=mov.filter(m=>m.tipo==='Gasto').reduce((a,m)=>a+m.monto,0);
+  const aho=mov.filter(m=>m.tipo==='Ahorro'||m.tipo==='Inversión').reduce((a,m)=>a+m.monto,0);
+  document.getElementById('f-ing').textContent=fmt(ing);
+  document.getElementById('f-gas').textContent=fmt(gas);
+  document.getElementById('f-aho').textContent=fmt(aho);
+  document.getElementById('f-bal').textContent=fmt(ing-gas-aho);
+  const gastos=mov.filter(m=>m.tipo==='Gasto');
+  const byCat={};
+  gastos.forEach(g=>{ byCat[g.categoria]=(byCat[g.categoria]||0)+g.monto; });
+  const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+  const top=sorted[0];
+  const fijos=gastos.filter(g=>g.tipogasto==='Fijo').reduce((a,m)=>a+m.monto,0);
+  const vars=gastos.filter(g=>g.tipogasto==='Variable').reduce((a,m)=>a+m.monto,0);
+  let ins='';
+  if(top) ins+=`<div class="insight">Tu mayor categoría de gasto es <strong>${top[0]}</strong> con ${fmt(top[1])} — ${gas>0?Math.round(top[1]/gas*100):0}% del total.</div>`;
+  if(fijos>0||vars>0) ins+=`<div class="insight">Gastos fijos: ${fmt(fijos)} · Gastos variables: ${fmt(vars)}. ${vars>fijos?'Tus gastos variables superan los fijos.':'Buen control de gastos variables.'}</div>`;
+  if(ing>0) ins+=`<div class="insight">Tasa de ahorro real: ${Math.round((ing-gas)/ing*100)}% de tus ingresos disponibles después de gastos.</div>`;
+  document.getElementById('fin-insights').innerHTML=ins;
+  const tipos=[...new Set(mov.map(m=>m.tipo))];
+  document.getElementById('fin-filtros').innerHTML='<button class="fbtn '+(finFiltro==='todos'?'on':'')+'" onclick="setFinFiltro(\'todos\',this)">Todos</button>'+tipos.map(t=>`<button class="fbtn ${finFiltro===t?'on':''}" onclick="setFinFiltro('${t}',this)">${t}</button>`).join('');
+  renderFinTable(); renderPieChart(byCat); renderBarChart(mov); renderLineChart(mov);
 }
 
-function rebuildFinTotals(m){
-  const {costos,gastos,util}=finTotals(m);
-  document.querySelectorAll('#fin-table-wrap .tot-r').forEach(tr=>{
-    const lbl=tr.cells[0].textContent.trim().toLowerCase();
-    const val=lbl.includes('costos')?costos:lbl.includes('gastos')?gastos:util;
-    tr.cells[1].textContent=fmtUSD(val);
-    tr.classList.remove('pos-r','neg-r');
-    if(lbl.includes('utilidad'))tr.classList.add(val>=0?'pos-r':'neg-r');
-  });
+function setFinFiltro(v,btn){ finFiltro=v; document.querySelectorAll('#fin-filtros .fbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); renderFinTable(); }
+
+function renderFinTable(){
+  const data=finFiltro==='todos'?D.fin:D.fin.filter(m=>m.tipo===finFiltro);
+  const tbody=document.getElementById('fin-tbody');
+  if(!data.length){ tbody.innerHTML='<tr><td colspan="6" class="empty">Sin datos</td></tr>'; return; }
+  const bm={Ingreso:'bg',Gasto:'br',Ahorro:'bb',Inversión:'bpu'};
+  tbody.innerHTML=data.slice().reverse().slice(0,50).map(m=>`<tr><td style="white-space:nowrap">${m.fecha}</td><td><span class="badge ${bm[m.tipo]||'bgr'}">${m.tipo}</span></td><td>${m.categoria}<br><small style="color:var(--text3)">${m.subcategoria||''}</small></td><td>${m.metodo||'—'}</td><td>${m.tipogasto||'—'}</td><td style="text-align:right;font-weight:600">${m.tipo==='Gasto'?'-':''}${fmt(m.monto)}</td></tr>`).join('');
 }
 
-function renderMonthTabs(){
-  document.getElementById('month-tabs').innerHTML=SHORT_M.map((m,i)=>`<button class="m-btn${i===curFinMonth?' active':''}" onclick="switchFinMonth(${i})">${m}</button>`).join('');
+let pieInst=null,barInst=null,lineInst=null;
+function renderPieChart(byCat){
+  const labels=Object.keys(byCat); const vals=Object.values(byCat);
+  document.getElementById('pie-legend').innerHTML=labels.map((l,i)=>`<span class="leg-item"><span class="leg-dot" style="background:${COLORS[i%COLORS.length]}"></span>${l}</span>`).join('');
+  const canvas=document.getElementById('pie-chart');
+  if(pieInst){ pieInst.destroy(); pieInst=null; }
+  if(!labels.length) return;
+  pieInst=new Chart(canvas,{type:'doughnut',data:{labels,datasets:[{data:vals,backgroundColor:COLORS.slice(0,labels.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fmt(ctx.raw)}`}}}}});
+}
+function renderBarChart(mov){
+  const meses={};
+  mov.forEach(m=>{ const k=m.fecha?m.fecha.substring(0,7):''; if(!k) return; if(!meses[k]) meses[k]={ing:0,gas:0}; if(m.tipo==='Ingreso') meses[k].ing+=m.monto; if(m.tipo==='Gasto') meses[k].gas+=m.monto; });
+  const keys=Object.keys(meses).sort();
+  const canvas=document.getElementById('bar-chart');
+  if(barInst){ barInst.destroy(); barInst=null; }
+  if(!keys.length) return;
+  barInst=new Chart(canvas,{type:'bar',data:{labels:keys,datasets:[{label:'Ingresos',data:keys.map(k=>meses[k].ing),backgroundColor:'#639922'},{label:'Gastos',data:keys.map(k=>meses[k].gas),backgroundColor:'#D85A30'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{autoSkip:false,maxRotation:45}},y:{ticks:{callback:v=>v>=1000000?Math.round(v/1000000)+'M':v>=1000?Math.round(v/1000)+'K':v}}}}});
+}
+function renderLineChart(mov){
+  const meses={};
+  mov.forEach(m=>{ const k=m.fecha?m.fecha.substring(0,7):''; if(!k) return; if(!meses[k]) meses[k]={ing:0,gas:0,aho:0}; if(m.tipo==='Ingreso') meses[k].ing+=m.monto; if(m.tipo==='Gasto') meses[k].gas+=m.monto; if(m.tipo==='Ahorro'||m.tipo==='Inversión') meses[k].aho+=m.monto; });
+  const keys=Object.keys(meses).sort();
+  const canvas=document.getElementById('line-chart');
+  if(lineInst){ lineInst.destroy(); lineInst=null; }
+  if(!keys.length) return;
+  lineInst=new Chart(canvas,{type:'line',data:{labels:keys,datasets:[{label:'Ingresos',data:keys.map(k=>meses[k].ing),borderColor:'#639922',backgroundColor:'rgba(99,153,34,0.08)',tension:0.3,fill:true},{label:'Gastos',data:keys.map(k=>meses[k].gas),borderColor:'#D85A30',backgroundColor:'rgba(216,90,48,0.08)',tension:0.3,fill:true},{label:'Ahorro',data:keys.map(k=>meses[k].aho),borderColor:'#185FA5',tension:0.3,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v>=1000000?Math.round(v/1000000)+'M':v>=1000?Math.round(v/1000)+'K':v}}}}});
 }
 
-function switchFinMonth(i){curFinMonth=i;renderMonthTabs();renderFinTable(i);renderFinMetrics(i);}
-
-// ── CALENDARIO ──
-let calMonth=now.getMonth();
-let calYear=now.getFullYear();
-let calNotes={};
-let editingKey=null;
-
-function renderCalendar(){
-  document.getElementById('cal-title').textContent=MONTHS_ES[calMonth]+' '+calYear;
-  document.getElementById('cal-dnames').innerHTML=DAY_NAMES_CAL.map(d=>`<div class="cal-dname">${d}</div>`).join('');
-  const cells=document.getElementById('cal-cells');
-  cells.innerHTML='';
-  const first=new Date(calYear,calMonth,1).getDay();
-  const last=new Date(calYear,calMonth+1,0).getDate();
-  for(let i=0;i<first;i++){
-    const pd=new Date(calYear,calMonth,-first+i+1).getDate();
-    const c=document.createElement('div');c.className='cal-cell other';
-    c.innerHTML=`<div class="cal-dnum">${pd}</div>`;cells.appendChild(c);
-  }
-  for(let d=1;d<=last;d++){
-    const isToday=now.getDate()===d&&now.getMonth()===calMonth&&now.getFullYear()===calYear;
-    const key=`${calYear}-${calMonth}-${d}`;
-    const note=calNotes[key]||'';
-    const c=document.createElement('div');
-    c.className='cal-cell'+(isToday?' today':'');
-    c.innerHTML=`<div class="cal-dnum">${d}</div>${note?`<div class="cal-cnote"><span class="cal-dot-s"></span>${note.substring(0,35)}${note.length>35?'…':''}</div>`:''}`;
-    c.onclick=()=>openNote(key,d);
-    cells.appendChild(c);
-  }
-  const rem=(first+last)%7;
-  if(rem>0){for(let d=1;d<=7-rem;d++){const c=document.createElement('div');c.className='cal-cell other';c.innerHTML=`<div class="cal-dnum">${d}</div>`;cells.appendChild(c);}}
-  if(!editingKey)document.getElementById('note-panel-wrap').innerHTML='';
+// CARRERA
+function renderCar(){
+  const s=D.car.skills;
+  const ids=['sql','py','tab','port','bi'];
+  ids.forEach(id=>{ document.getElementById('pct-'+id).textContent=(s[id]||0)+'%'; document.getElementById('bar-'+id).style.width=(s[id]||0)+'%'; });
+  document.getElementById('c-apps').textContent=D.car.apps.length;
+  document.getElementById('c-log').textContent=D.car.logros.length;
+  document.getElementById('c-net').textContent=D.car.networking.length;
+  const wk=Math.ceil((new Date()-new Date('2025-05-01'))/(7*24*3600*1000));
+  document.getElementById('c-sem').textContent=Math.max(1,Math.min(8,wk));
+  const bm={Enviada:'bb',Entrevista:'ba','En proceso':'ba',Rechazada:'br',Oferta:'bg'};
+  const pip=document.getElementById('car-pipeline');
+  pip.innerHTML=D.car.apps.length?D.car.apps.map(a=>`<tr><td>${a.empresa}</td><td>${a.rol}</td><td><span class="badge ${bm[a.estado]||'bgr'}">${a.estado}</span></td></tr>`).join(''):'<tr><td colspan="3" class="empty">Sin aplicaciones</td></tr>';
+  const net=document.getElementById('car-net');
+  net.innerHTML=D.car.networking.length?D.car.networking.map(n=>`<tr><td>${n.nombre}</td><td>${n.empresa}</td><td>${n.rol}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">Sin contactos</td></tr>';
+  document.getElementById('car-logros-lista').innerHTML=D.car.logros.length?D.car.logros.slice().reverse().map(l=>`<div style="padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px"><small style="color:var(--text3)">${l.fecha}</small><br>${l.texto}</div>`).join(''):'Sin logros aún.';
+  document.getElementById('car-notas-lista').innerHTML=D.car.notas.length?D.car.notas.slice().reverse().map(n=>`<div style="padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px"><small style="color:var(--text3)">${n.fecha}</small> ${n.texto}</div>`).join(''):'Sin notas.';
+}
+function addApp(){ const e=document.getElementById('car-emp').value.trim(),r=document.getElementById('car-rol').value.trim(); if(!e||!r) return; D.car.apps.push({empresa:e,rol:r,estado:document.getElementById('car-est').value}); document.getElementById('car-emp').value=''; document.getElementById('car-rol').value=''; save(); renderCar(); }
+function addNet(){ const n=document.getElementById('net-nombre').value.trim(); if(!n) return; D.car.networking.push({nombre:n,empresa:document.getElementById('net-empresa').value.trim(),rol:document.getElementById('net-rol').value.trim()}); ['net-nombre','net-empresa','net-rol'].forEach(id=>document.getElementById(id).value=''); save(); renderCar(); }
+function addLogro(){ const t=document.getElementById('car-logro').value.trim(); if(!t) return; D.car.logros.push({texto:t,fecha:new Date().toLocaleDateString('es-CO')}); document.getElementById('car-logro').value=''; save(); renderCar(); }
+function addNotaCar(){ const t=document.getElementById('car-nota').value.trim(); if(!t) return; D.car.notas.push({texto:t,fecha:new Date().toLocaleDateString('es-CO')}); document.getElementById('car-nota').value=''; save(); renderCar(); }
+function editarPct(){
+  const ids=['sql','py','tab','port','bi'];
+  const labels=['SQL','Python/Pandas','Tableau','Portafolio','Power BI'];
+  ids.forEach((id,i)=>{ const v=prompt(`${labels[i]} — porcentaje actual (0-100):`,D.car.skills[id]||0); if(v!==null){ const n=Math.min(100,Math.max(0,parseInt(v)||0)); D.car.skills[id]=n; } });
+  save(); renderCar();
 }
 
-function openNote(key,day){
-  editingKey=key;
-  document.getElementById('note-panel-wrap').innerHTML=`
-    <div class="note-panel">
-      <div class="note-panel-title">Nota · ${day} de ${MONTHS_ES[calMonth]}</div>
-      <textarea class="note-ta" id="note-ta" placeholder="Escribe tu nota, evento o recordatorio...">${calNotes[key]||''}</textarea>
-      <div class="note-actions">
-        <button class="save-btn" onclick="saveNote()">Guardar nota</button>
-        <button class="cancel-btn" onclick="cancelNote()">Cancelar</button>
-      </div>
-    </div>`;
-  document.getElementById('note-ta').focus();
+// EDUCACIÓN
+function addCurso(){ const n=document.getElementById('e-nombre').value.trim(); if(!n) return; D.edu.cursos.push({nombre:n,plat:document.getElementById('e-plat').value.trim(),tipo:document.getElementById('e-tipo').value,estado:document.getElementById('e-est').value,pct:parseInt(document.getElementById('e-pct').value)||0,notas:document.getElementById('e-notas').value.trim()}); ['e-nombre','e-plat','e-pct','e-notas'].forEach(id=>document.getElementById(id).value=''); save(); renderEdu(); }
+function addTema(){ const t=document.getElementById('tema-nuevo').value.trim(); if(!t) return; D.edu.temas.push(t); document.getElementById('tema-nuevo').value=''; save(); renderEdu(); }
+function filterEdu(v,btn){ eduFiltro=v; document.querySelectorAll('#s-edu .filter-bar .fbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); renderEduTable(); }
+function renderEdu(){
+  const c=D.edu.cursos;
+  document.getElementById('e-cur').textContent=c.filter(x=>x.estado==='En curso').length;
+  document.getElementById('e-comp').textContent=c.filter(x=>x.estado==='Completado').length;
+  document.getElementById('e-pend').textContent=c.filter(x=>x.estado==='Pendiente').length;
+  document.getElementById('e-glob').textContent=c.filter(x=>x.tipo==='Globant obligatorio').length;
+  renderEduTable();
+  const tl=document.getElementById('temas-lista');
+  tl.innerHTML=D.edu.temas.length?D.edu.temas.map((t,i)=>`<span style="display:inline-block;padding:3px 9px;border-radius:12px;font-size:11px;background:var(--bg2);color:var(--text2);margin:2px;cursor:pointer" onclick="D.edu.temas.splice(${i},1);save();renderEdu()">${t} ×</span>`).join(''):'<span style="font-size:12px;color:var(--text3)">Agrega temas que no quieres perder de vista.</span>';
+}
+function renderEduTable(){
+  const data=eduFiltro==='todos'?D.edu.cursos:D.edu.cursos.filter(c=>c.estado===eduFiltro||c.tipo===eduFiltro);
+  const tbody=document.getElementById('edu-tbody');
+  if(!data.length){ tbody.innerHTML='<tr><td colspan="7" class="empty">Sin cursos</td></tr>'; return; }
+  const em={Completado:'bg','En curso':'bb',Pendiente:'bgr',Pausado:'ba'};
+  const tm={'Globant obligatorio':'bpu','Personal - Data':'bb','Personal - Otros':'bg',Certificación:'ba'};
+  tbody.innerHTML=data.map(c=>`<tr><td style="font-weight:600">${c.nombre}</td><td style="color:var(--text2)">${c.plat||'—'}</td><td><span class="badge ${tm[c.tipo]||'bgr'}">${c.tipo}</span></td><td><span class="badge ${em[c.estado]||'bgr'}">${c.estado}</span></td><td><div class="pw" style="width:80px;display:inline-block"><div class="pf" style="width:${c.pct}%;background:#185FA5"></div></div> <small>${c.pct}%</small></td><td style="color:var(--text3)">${c.notas||'—'}</td><td><button style="font-size:10px;padding:2px 6px" onclick="D.edu.cursos.splice(D.edu.cursos.indexOf(${JSON.stringify(c).replace(/"/g,"'")}),1);save();renderEdu()">×</button></td></tr>`).join('');
 }
 
-function saveNote(){
-  if(editingKey){calNotes[editingKey]=document.getElementById('note-ta').value.trim();}
-  editingKey=null;document.getElementById('note-panel-wrap').innerHTML='';renderCalendar();
+// LECTURAS
+let lecPieInst=null,lecBarInst=null;
+function addLibro(){ const t=document.getElementById('l-tit').value.trim(); if(!t) return; D.lec.push({titulo:t,autor:document.getElementById('l-aut').value.trim(),cat:document.getElementById('l-cat').value,estado:document.getElementById('l-est').value,rating:parseInt(document.getElementById('l-rating').value)||0}); ['l-tit','l-aut','l-rating'].forEach(id=>document.getElementById(id).value=''); save(); renderLec(); renderLecCharts(); }
+function filterLec(v,btn){ lecFiltro=v; document.querySelectorAll('#s-lec .filter-bar .fbtn').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); renderLecTable(); }
+function renderLec(){ document.getElementById('l-ley').textContent=D.lec.filter(l=>l.estado==='Leyendo').length; document.getElementById('l-lei').textContent=D.lec.filter(l=>l.estado==='Leído').length; document.getElementById('l-por').textContent=D.lec.filter(l=>l.estado==='Por leer').length; document.getElementById('l-meta').textContent=D.lec.filter(l=>l.estado==='Leído').length+'/12'; renderLecTable(); }
+function renderLecTable(){
+  const data=lecFiltro==='todos'?D.lec:D.lec.filter(l=>l.estado===lecFiltro);
+  const tbody=document.getElementById('lec-tbody');
+  if(!data.length){ tbody.innerHTML='<tr><td colspan="6" class="empty">Sin libros</td></tr>'; return; }
+  const em={Leyendo:'bb',Leído:'bg','Por leer':'bgr',Abandonado:'br'};
+  tbody.innerHTML=data.map((l,i)=>`<tr><td style="font-weight:600">${l.titulo}</td><td style="color:var(--text2)">${l.autor||'—'}</td><td><span class="badge bgr">${l.cat}</span></td><td><span class="badge ${em[l.estado]||'bgr'}">${l.estado}</span></td><td>${l.rating?'★'.repeat(l.rating):'—'}</td><td><button style="font-size:10px;padding:2px 6px" onclick="D.lec.splice(${i},1);save();renderLec();renderLecCharts()">×</button></td></tr>`).join('');
 }
-function cancelNote(){editingKey=null;document.getElementById('note-panel-wrap').innerHTML='';renderCalendar();}
+function renderLecCharts(){
+  const byCat={};
+  D.lec.forEach(l=>{ byCat[l.cat]=(byCat[l.cat]||0)+1; });
+  const byEst={Leyendo:0,Leído:0,'Por leer':0,Abandonado:0};
+  D.lec.forEach(l=>{ if(byEst[l.estado]!==undefined) byEst[l.estado]++; });
+  const c1=document.getElementById('lec-pie');
+  if(lecPieInst){ lecPieInst.destroy(); lecPieInst=null; }
+  if(Object.keys(byCat).length) lecPieInst=new Chart(c1,{type:'doughnut',data:{labels:Object.keys(byCat),datasets:[{data:Object.values(byCat),backgroundColor:COLORS,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},boxWidth:10}}}}});
+  const c2=document.getElementById('lec-bar');
+  if(lecBarInst){ lecBarInst.destroy(); lecBarInst=null; }
+  lecBarInst=new Chart(c2,{type:'bar',data:{labels:Object.keys(byEst),datasets:[{data:Object.values(byEst),backgroundColor:['#185FA5','#639922','#888780','#D85A30'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{stepSize:1}}}}});
+}
 
-document.getElementById('cal-prev').onclick=()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();};
-document.getElementById('cal-next').onclick=()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();};
+// FITNESS
+const DIAS=['D','L','M','X','J','V','S'];
+let fitInst=null;
+function gymHoy(fue){ const k=hoy.toISOString().split('T')[0]; const idx=D.fit.gym.findIndex(g=>g.fecha===k); if(idx>=0) D.fit.gym[idx].fue=fue; else D.fit.gym.push({fecha:k,fue}); save(); renderFit(); }
+function savePeso(){ const p=parseFloat(document.getElementById('fit-pinput').value),m=parseFloat(document.getElementById('fit-minput').value); if(!isNaN(p)){ D.fit.pesos.push({fecha:hoy.toLocaleDateString('es-CO'),kg:p}); document.getElementById('fit-pinput').value=''; } if(!isNaN(m)) D.fit.meta=m; save(); renderFit(); renderFitChart(); }
+function addNotaFit(){ const t=document.getElementById('fit-nota-i').value.trim(); if(!t) return; D.fit.notas.push({texto:t,fecha:hoy.toLocaleDateString('es-CO')}); document.getElementById('fit-nota-i').value=''; save(); renderFit(); }
+function renderFit(){
+  const ul=D.fit.pesos[D.fit.pesos.length-1];
+  document.getElementById('fit-p').textContent=ul?ul.kg:'—';
+  document.getElementById('fit-mp').textContent=D.fit.meta||'—';
+  const semStart=new Date(hoy); semStart.setDate(hoy.getDate()-hoy.getDay());
+  document.getElementById('fit-d').textContent=D.fit.gym.filter(g=>new Date(g.fecha)>=semStart&&g.fue).length+'/5';
+  let racha=0; const sorted=D.fit.gym.filter(g=>g.fue).sort((a,b)=>new Date(b.fecha)-new Date(a.fecha));
+  if(sorted.length){ racha=1; for(let i=1;i<sorted.length;i++){ if((new Date(sorted[i-1].fecha)-new Date(sorted[i].fecha))/86400000<=1) racha++; else break; } }
+  document.getElementById('fit-r').textContent=racha;
+  const st=document.getElementById('fit-streak'); const start=new Date(hoy); start.setDate(hoy.getDate()-6); let h='';
+  for(let i=0;i<7;i++){ const d=new Date(start); d.setDate(start.getDate()+i); const k=d.toISOString().split('T')[0]; const rec=D.fit.gym.find(g=>g.fecha===k); const isT=d.toDateString()===hoy.toDateString(); h+=`<div style="width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;border:1px solid;${rec&&rec.fue?'background:#EAF3DE;color:#3B6D11;border-color:#C0DD97':'background:var(--bg2);color:var(--text3);border-color:var(--border)'}${isT?';outline:2px solid var(--text)':''}">${DIAS[d.getDay()]}</div>`; }
+  st.innerHTML=h;
+  document.getElementById('fit-notas').innerHTML=D.fit.notas.length?D.fit.notas.slice().reverse().map(n=>`<div style="padding:5px 0;border-bottom:0.5px solid var(--border)"><small style="color:var(--text3)">${n.fecha}</small> ${n.texto}</div>`).join(''):'Sin notas.';
+}
+function renderFitChart(){
+  const canvas=document.getElementById('fit-chart'); if(!canvas) return;
+  if(fitInst){ fitInst.destroy(); fitInst=null; }
+  const data=D.fit.pesos.slice(-10); if(!data.length) return;
+  fitInst=new Chart(canvas,{type:'line',data:{labels:data.map(d=>d.fecha),datasets:[{label:'Peso',data:data.map(d=>d.kg),borderColor:'#185FA5',backgroundColor:'rgba(24,95,165,0.08)',tension:0.3,fill:true,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'kg'}}}}});
+}
 
-// ── INIT ──
-renderAreas();
-renderTasks();
-renderProjects();
-renderHabits();
-renderMood();
-updateDashHab();
-renderMonthTabs();
-renderFinTable(curFinMonth);
-renderFinMetrics(curFinMonth);
-renderCalendar();
+// CRECIMIENTO
+function addHabito(){ const t=document.getElementById('hab-new').value.trim(); if(!t) return; D.per.habitos.push({texto:t,completados:{}}); document.getElementById('hab-new').value=''; save(); renderPer(); }
+function toggleHab(i){ const k=hoy.toISOString().split('T')[0]; D.per.habitos[i].completados[k]=!D.per.habitos[i].completados[k]; save(); renderPer(); }
+function saveRef(){ const t=document.getElementById('ref-txt').value.trim(); if(!t) return; D.per.reflexiones.push({texto:t,fecha:hoy.toLocaleDateString('es-CO')}); document.getElementById('ref-txt').value=''; save(); renderPer(); }
+function addMeta(){ const t=document.getElementById('meta-txt').value.trim(); if(!t) return; D.per.metas.push({texto:t,plazo:document.getElementById('meta-plazo').value,done:false}); document.getElementById('meta-txt').value=''; save(); renderPer(); }
+function renderPer(){
+  const k=hoy.toISOString().split('T')[0];
+  const ch=D.per.habitos.filter(h=>h.completados[k]).length;
+  document.getElementById('p-hab').textContent=D.per.habitos.length;
+  document.getElementById('p-hoy').textContent=ch;
+  document.getElementById('p-ref').textContent=D.per.reflexiones.length;
+  document.getElementById('p-met').textContent=D.per.metas.filter(m=>!m.done).length;
+  const pm={Corto:'ba',Mediano:'bb',Largo:'bg'};
+  document.getElementById('hab-lista').innerHTML=D.per.habitos.length?D.per.habitos.map((h,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:12px"><input type="checkbox" ${h.completados[k]?'checked':''} onchange="toggleHab(${i})"><span style="${h.completados[k]?'text-decoration:line-through;opacity:0.5':''}">${h.texto}</span></div>`).join(''):'<div style="font-size:12px;color:var(--text3);padding:8px 0">Agrega hábitos diarios.</div>';
+  document.getElementById('ref-lista').innerHTML=D.per.reflexiones.length?D.per.reflexiones.slice().reverse().map(r=>`<div style="padding:6px 0;border-bottom:0.5px solid var(--border)"><small style="color:var(--text3)">${r.fecha}</small><br>${r.texto}</div>`).join(''):'Sin reflexiones.';
+  document.getElementById('metas-lista').innerHTML=D.per.metas.length?D.per.metas.map((m,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:12px"><input type="checkbox" ${m.done?'checked':''} onchange="D.per.metas[${i}].done=!D.per.metas[${i}].done;save();renderPer()"><span style="${m.done?'text-decoration:line-through;opacity:0.5':''}">${m.texto}</span><span class="badge ${pm[m.plazo]||'bgr'}" style="margin-left:auto">${m.plazo}</span></div>`).join(''):'<div style="font-size:12px;color:var(--text3);padding:8px 0">Sin metas.</div>';
+}
+
+// INIT
+renderFin(); renderCar(); renderEdu(); renderLec(); renderFit(); renderPer();
 </script>
 </body>
 </html>
